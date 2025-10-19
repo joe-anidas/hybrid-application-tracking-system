@@ -34,4 +34,11 @@ export async function login(payload) {
   })
 }
 
-export default { register, login }
+export async function getProfile() {
+  const token = localStorage.getItem('token')
+  return request('/auth/profile', {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+}
+
+export default { register, login, getProfile }

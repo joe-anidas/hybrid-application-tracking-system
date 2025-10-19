@@ -3,6 +3,8 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import authRoutes from './routes/authRoutes.js'
+import dashboardRoutes from './routes/dashboardRoutes.js'
+import { createDemoUsers } from './config/seedDemoUsers.js'
 
 const app = express();
 
@@ -33,11 +35,16 @@ app.use(express.json()); // parse JSON body
 // ✅ MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI || "mongodb://localhost:27017/hybrid-ats")
-  .then(() => console.log("✅ MongoDB connected"))
+  .then(async () => {
+    console.log("✅ MongoDB connected")
+    // Create demo users for testing
+    await createDemoUsers()
+  })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Mount routes
 app.use('/api/auth', authRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 // ✅ Start server
 const PORT = process.env.PORT || 3000;

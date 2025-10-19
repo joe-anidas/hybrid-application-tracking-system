@@ -19,13 +19,16 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: [true, 'Password is required']
+    },
+    role: {
+      type: String,
+      required: [true, 'Role is required'],
+      enum: ['Applicant', 'Bot Mimic', 'Admin'],
+      default: 'Applicant'
     }
   },
   { timestamps: true }
 )
-
-// Helpful index for unique emails
-userSchema.index({ email: 1 }, { unique: true })
 
 const User = mongoose.model('User', userSchema)
 export default User

@@ -7,9 +7,14 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body
+    const { name, email, password, role } = req.body
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email and password are required' })
+    }
+
+    // Validate role if provided
+    if (role && !['Applicant', 'Bot Mimic', 'Admin'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role. Must be Applicant, Bot Mimic, or Admin' })
     }
 
     const existing = await User.findOne({ email })
@@ -20,13 +25,18 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const passwordHash = await bcrypt.hash(password, salt)
 
-    const user = await User.create({ name, email, passwordHash })
+    const user = await User.create({ 
+      name, 
+      email, 
+      passwordHash, 
+      role: role || 'Applicant' // Default to Applicant if no role specified
+    })
 
-    const token = jwt.sign({ sub: user._id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+    const token = jwt.sign({ sub: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 
     res.status(201).json({
       message: 'Registered successfully',
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
       token
     })
   } catch (err) {
@@ -59,15 +69,38 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' })
     }
 
-    const token = jwt.sign({ sub: user._id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+    const token = jwt.sign({ sub: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 
     res.json({
       message: 'Logged in successfully',
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
       token
     })
   } catch (err) {
     console.error('Login error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
+export const profile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-passwordHash')
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+    
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }
+    })
+  } catch (err) {
+    console.error('Profile error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 }
