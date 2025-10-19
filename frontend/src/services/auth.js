@@ -1,0 +1,37 @@
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api'
+
+async function request(path, options = {}) {
+  const fetchOptions = {
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  }
+  // Ensure body is stringified if it's an object
+  if (fetchOptions.body && typeof fetchOptions.body !== 'string') {
+    fetchOptions.body = JSON.stringify(fetchOptions.body)
+  }
+
+  const res = await fetch(`${API_BASE}${path}`, fetchOptions)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    // prefer server-supplied error message but include status for debugging
+    const message = data?.error || data?.message || `Request failed (${res.status})`
+    throw new Error(message)
+  }
+  return data
+}
+
+export async function register(payload) {
+  return request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function login(payload) {
+  return request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export default { register, login }
