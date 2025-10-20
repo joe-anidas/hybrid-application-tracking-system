@@ -200,7 +200,8 @@ router.get('/my-applications', authenticateToken, async (req, res) => {
     }
 
     const applications = await Application.find({ applicant: req.user.id })
-      .populate('job', 'title department location type jobType status')
+      .populate('job', 'title department location type jobType status applicants')
+      .populate('profile')
       .sort({ createdAt: -1 })
 
     res.json({

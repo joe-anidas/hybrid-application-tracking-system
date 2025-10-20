@@ -1,35 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
-import { FileText, Clock, Calendar, CheckCircle, XCircle, User, Edit, ChevronRight } from 'lucide-react'
+import { FileText, CheckCircle, User, Edit, ChevronRight, Eye, ExternalLink, Users } from 'lucide-react'
 import DashboardLayout from '../components/DashboardLayout'
-import { getApplicantDashboard } from '../services/dashboard'
 import { getProfile } from '../services/profile'
+import { getMyApplications } from '../services/applications'
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
-
-const StatCard = ({ icon: Icon, title, value, color = 'indigo' }) => (
-  <div className="bg-white overflow-hidden shadow rounded-lg">
-    <div className="p-5">
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          <Icon className={`h-6 w-6 text-${color}-600`} />
-        </div>
-        <div className="ml-5 w-0 flex-1">
-          <dl>
-            <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
-            <dd className="text-lg font-medium text-gray-900">{value}</dd>
-          </dl>
-        </div>
-      </div>
-    </div>
-  </div>
-)
+const STATUS_COLORS = {
+  submitted: 'bg-blue-100 text-blue-800',
+  'under-review': 'bg-yellow-100 text-yellow-800',
+  shortlisted: 'bg-green-100 text-green-800',
+  rejected: 'bg-red-100 text-red-800',
+  withdrawn: 'bg-gray-100 text-gray-800',
+  accepted: 'bg-purple-100 text-purple-800'
+}
 
 const ApplicantDashboard = () => {
   const navigate = useNavigate()
-  const [dashboardData, setDashboardData] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [applications, setApplications] = useState([])
   const [profileCompletion, setProfileCompletion] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -38,12 +26,12 @@ const ApplicantDashboard = () => {
     const fetchDashboard = async () => {
       try {
         setLoading(true)
-        const [dashData, profileData] = await Promise.all([
-          getApplicantDashboard(),
-          getProfile()
+        const [profileData, applicationsData] = await Promise.all([
+          getProfile(),
+          getMyApplications()
         ])
-        setDashboardData(dashData)
         setProfile(profileData.profile)
+        setApplications(applicationsData.applications || [])
         
         // Calculate profile completion
         if (profileData.profile) {
@@ -78,6 +66,23 @@ const ApplicantDashboard = () => {
     return Math.round((completed / fields.length) * 100)
   }
 
+  const formatDate = (date) => {
+    if (!date) return 'N/A'
+    try {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    } catch (error) {
+      return 'Invalid Date'
+    }
+  }
+
+  const getSubmissionDate = (application) => {
+    return application.submittedAt || application.createdAt || application.appliedAt
+  }
+
   if (loading) {
     return (
       <DashboardLayout title="Applicant Dashboard">
@@ -96,26 +101,6 @@ const ApplicantDashboard = () => {
         </div>
       </DashboardLayout>
     )
-  }
-
-  const { stats, recentActivity } = dashboardData
-
-  // Data for pie chart
-  const pieData = [
-    { name: 'Pending', value: stats.pending, color: COLORS[0] },
-    { name: 'Interviews', value: stats.interviews, color: COLORS[1] },
-    { name: 'Offers', value: stats.offers, color: COLORS[2] },
-    { name: 'Rejections', value: stats.rejections, color: COLORS[3] }
-  ]
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending': return <Clock className="h-4 w-4 text-yellow-500" />
-      case 'interview': return <Calendar className="h-4 w-4 text-blue-500" />
-      case 'offer': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'reviewed': return <FileText className="h-4 w-4 text-purple-500" />
-      default: return <XCircle className="h-4 w-4 text-red-500" />
-    }
   }
 
   return (
@@ -163,81 +148,119 @@ const ApplicantDashboard = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            icon={FileText}
-            title="Total Applications"
-            value={stats.totalApplications}
-            color="indigo"
-          />
-          <StatCard
-            icon={Clock}
-            title="Pending"
-            value={stats.pending}
-            color="yellow"
-          />
-          <StatCard
-            icon={Calendar}
-            title="Interviews"
-            value={stats.interviews}
-            color="blue"
-          />
-          <StatCard
-            icon={CheckCircle}
-            title="Offers"
-            value={stats.offers}
-            color="green"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Application Status Chart */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Application Status Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+        {/* My Applications Section */}
+        <div className="bg-white shadow rounded-lg overflow-hidden mt-6">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h3 className="text-lg font-medium text-gray-900 flex items-center">
+              <FileText className="h-5 w-5 mr-2 text-indigo-600" />
+              My Applications
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Track all your job applications and their current status
+            </p>
           </div>
 
-          {/* Recent Activity */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    {getStatusIcon(activity.status)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      {activity.action}
-                    </p>
-                    <p className="text-sm text-gray-500">{activity.company}</p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(activity.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
+          {applications.length === 0 ? (
+            <div className="px-6 py-12 text-center">
+              <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h4 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h4>
+              <p className="text-gray-600 mb-4">Start applying to jobs to see them here</p>
+              <button
+                onClick={() => navigate('/jobs')}
+                className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              >
+                Browse Jobs
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Position
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Department
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Applied On
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Applicants
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Comments
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {applications.map((application) => (
+                    <tr key={application._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {application.job?.title || 'Unknown Position'}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {application.job?.location || 'N/A'}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => navigate(`/jobs/${application.job?._id}`)}
+                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                            title="View Job Details"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{application.job?.department || 'N/A'}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{formatDate(getSubmissionDate(application))}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1 text-sm text-gray-900">
+                          <Users className="h-4 w-4 text-gray-400" />
+                          {application.job?.applicants || 0}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[application.status]}`}>
+                          {application.status?.replace('-', ' ') || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 max-w-xs truncate" title={application.notes || ''}>
+                          {application.notes || <span className="text-gray-400 italic">No comments</span>}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => navigate(`/applications/${application._id}`)}
+                          className="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-xs font-medium"
+                          title="Review Application"
+                        >
+                          <Eye className="h-3.5 w-3.5 mr-1.5" />
+                          Review
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

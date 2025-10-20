@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Save, User, Briefcase, GraduationCap, Award, MapPin, Phone, Mail } from 'lucide-react'
+import { Save, User, Briefcase, GraduationCap, Award, MapPin, Phone, Mail, CheckCircle, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getProfile, updateProfile } from '../services/profile'
 
@@ -11,6 +11,7 @@ export default function ApplicantProfile() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
   
   const [profile, setProfile] = useState({
     // Personal Info
@@ -196,7 +197,17 @@ export default function ApplicantProfile() {
       const response = await updateProfile(profile)
       if (response.success) {
         setSuccess('Profile updated successfully!')
-        setTimeout(() => setSuccess(''), 3000)
+        setShowSuccessPopup(true)
+        
+        // Hide popup after 3 seconds
+        setTimeout(() => {
+          setShowSuccessPopup(false)
+        }, 3000)
+        
+        // Clear success message after fade out
+        setTimeout(() => {
+          setSuccess('')
+        }, 3500)
       }
     } catch (err) {
       console.error('Error updating profile:', err)
@@ -266,6 +277,38 @@ export default function ApplicantProfile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      {/* Success Popup Notification */}
+      {showSuccessPopup && (
+        <div className="fixed top-4 right-4 z-50 animate-slideIn">
+          <div className="bg-white rounded-lg shadow-2xl border border-green-200 overflow-hidden max-w-md">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold text-lg">Success!</h3>
+                    <p className="text-green-50 text-sm">Profile saved successfully</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSuccessPopup(false)}
+                  className="text-white hover:text-green-100 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-green-50">
+              <p className="text-sm text-green-800">
+                Your profile information has been updated and saved.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header with Actions */}
         <div className="flex justify-between items-center mb-6">

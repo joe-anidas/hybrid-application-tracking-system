@@ -12,6 +12,7 @@ import JobDetails from './pages/JobDetails.jsx'
 import JobApplication from './pages/JobApplication.jsx'
 import ApplicantProfile from './pages/ApplicantProfile.jsx'
 import ApplicantDashboard from './pages/ApplicantDashboard.jsx'
+import ApplicationReview from './pages/ApplicationReview.jsx'
 import BotMimicDashboard from './pages/BotMimicDashboard.jsx'
 import reactLogo from './assets/react.svg'
 
@@ -113,6 +114,20 @@ function AppContent() {
     }
   }
 
+  // Get avatar gradient color based on role
+  const getAvatarGradient = (role) => {
+    switch (role) {
+      case 'Admin':
+        return 'bg-gradient-to-br from-purple-500 to-pink-600'
+      case 'Applicant':
+        return 'bg-gradient-to-br from-indigo-500 to-blue-600'
+      case 'Bot Mimic':
+        return 'bg-gradient-to-br from-green-500 to-teal-600'
+      default:
+        return 'bg-gradient-to-br from-gray-500 to-gray-600'
+    }
+  }
+
   return (
     <div className="min-h-dvh flex flex-col bg-gradient-to-b from-white to-slate-50 text-slate-800">
       {/* Header */}
@@ -142,7 +157,7 @@ function AppContent() {
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center gap-2 focus:outline-none"
                 >
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-md hover:shadow-lg transition-shadow">
+                  <div className={`h-9 w-9 rounded-full ${getAvatarGradient(user.role)} flex items-center justify-center text-white font-semibold text-sm shadow-md hover:shadow-lg transition-shadow`}>
                     {getInitials(user.name)}
                   </div>
                 </button>
@@ -153,7 +168,7 @@ function AppContent() {
                     {/* User Info Header */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                        <div className={`h-10 w-10 rounded-full ${getAvatarGradient(user.role)} flex items-center justify-center text-white font-semibold`}>
                           {getInitials(user.name)}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -277,6 +292,14 @@ function AppContent() {
           element={
             <ProtectedRoute allowedRoles={['Applicant']}>
               <ApplicantDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/applications/:id" 
+          element={
+            <ProtectedRoute allowedRoles={['Applicant']}>
+              <ApplicationReview />
             </ProtectedRoute>
           } 
         />
