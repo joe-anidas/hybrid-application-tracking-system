@@ -37,10 +37,10 @@ export default function JobDetails() {
   }
 
   const formatSalary = (min, max) => {
-    if (!min && !max) return 'Competitive salary'
-    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`
-    if (min) return `From $${min.toLocaleString()}`
-    if (max) return `Up to $${max.toLocaleString()}`
+    if (!min && !max) return 'Competitive'
+    if (min && max) return `₹${(min / 100000).toFixed(1)} - ${(max / 100000).toFixed(1)} LPA`
+    if (min) return `From ₹${(min / 100000).toFixed(1)} LPA`
+    if (max) return `Up to ₹${(max / 100000).toFixed(1)} LPA`
   }
 
   const formatDate = (date) => {
