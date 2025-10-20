@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Users, FileText, Briefcase, Clock, Plus, Eye, Activity } from 'lucide-react'
-import DashboardLayout from '../components/DashboardLayout'
 import { getAdminDashboard } from '../services/dashboard'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']
@@ -50,21 +49,25 @@ export default function Admin() {
 
   if (loading) {
     return (
-      <DashboardLayout title="Admin Dashboard">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <DashboardLayout title="Admin Dashboard">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-700">Error loading dashboard: {error}</div>
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="text-red-700">Error loading dashboard: {error}</div>
+          </div>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
@@ -80,8 +83,16 @@ export default function Admin() {
   }
 
   return (
-    <DashboardLayout title="Admin Dashboard">
-      <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Title */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <Activity className="h-8 w-8 text-indigo-600 mr-3" />
+            Admin Dashboard
+          </h1>
+          <p className="mt-2 text-gray-600">Overview of system activity and statistics</p>
+        </div>
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard
@@ -212,6 +223,6 @@ export default function Admin() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
