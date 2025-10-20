@@ -5,6 +5,7 @@ import Home from './pages/Home.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Admin from './pages/AdminDashboard.jsx'
+import AnalyticsDashboard from './pages/AnalyticsDashboard.jsx'
 import CreateJob from './pages/CreateJob.jsx'
 import ReviewApplications from './pages/ReviewApplications.jsx'
 import Jobs from './pages/Jobs.jsx'
@@ -135,7 +136,7 @@ function AppContent() {
     <div className="min-h-dvh flex flex-col bg-gradient-to-b from-white to-slate-50 text-slate-800">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <nav className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <nav className="mx-auto max-w-7xl px-8 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <img src={reactLogo} alt="Logo" className="size-7" />
             <span className="font-semibold tracking-tight">Hybrid ATS</span>
@@ -271,6 +272,14 @@ function AppContent() {
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
               <Admin />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/analytics" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <AnalyticsDashboard />
             </ProtectedRoute>
           } 
         />

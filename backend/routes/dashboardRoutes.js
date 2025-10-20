@@ -52,32 +52,54 @@ router.get('/bot-mimic', requireAuth, requireRole('Bot Mimic'), (req, res) => {
 })
 
 // GET /api/dashboard/admin - Admin dashboard data
-router.get('/admin', requireAuth, requireRole('Admin'), (req, res) => {
-  // Mock dashboard data for admin
-  res.json({
-    user: {
-      id: req.user._id,
-      name: req.user.name,
-      role: req.user.role
-    },
-    stats: {
-      totalApplications: 245,
-      totalUsers: 78,
-      activeJobPostings: 15,
-      nonTechnicalApplications: 67,
-      pendingReview: 34
-    },
-    recentActivity: [
-      { id: 1, action: 'New job posting created', title: 'Marketing Manager', date: new Date().toISOString(), type: 'job_posting' },
-      { id: 2, action: 'Application manually reviewed', applicant: 'Alice Brown', position: 'HR Specialist', date: new Date(Date.now() - 1800000).toISOString(), type: 'review' },
-      { id: 3, action: 'User registered', user: 'Charlie Wilson', role: 'Applicant', date: new Date(Date.now() - 5400000).toISOString(), type: 'user_registration' }
-    ],
-    jobPostings: [
-      { id: 1, title: 'Marketing Manager', department: 'Marketing', applicants: 12, status: 'active' },
-      { id: 2, title: 'HR Specialist', department: 'Human Resources', applicants: 8, status: 'active' },
-      { id: 3, title: 'Sales Representative', department: 'Sales', applicants: 15, status: 'active' }
-    ]
-  })
+router.get('/admin', requireAuth, requireRole('Admin'), async (req, res) => {
+  try {
+    const User = (await import('../models/User.js')).default
+    const Job = (await import('../models/Job.js')).default
+    const Application = (await import('../models/Application.js')).default
+
+    // Get real statistics from database
+    const [
+      totalApplications,
+      totalUsers,
+      activeJobPostings,
+      nonTechnicalApplications,
+      pendingReview
+    ] = await Promise.all([
+      Application.countDocuments(),
+      User.countDocuments({ role: { $in: ['Applicant', 'Admin', 'Bot Mimic'] } }),
+      Job.countDocuments({ status: 'active' }),
+      Application.countDocuments({ 
+        jobId: { 
+          $in: await Job.find({ jobType: 'non-technical' }).distinct('_id') 
+        } 
+      }),
+      Application.countDocuments({ 
+        status: { $in: ['submitted', 'under-review'] } 
+      })
+    ])
+
+    res.json({
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        role: req.user.role
+      },
+      stats: {
+        totalApplications,
+        totalUsers,
+        activeJobPostings,
+        nonTechnicalApplications,
+        pendingReview
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching admin dashboard:', error)
+    res.status(500).json({ 
+      error: 'Failed to fetch dashboard data',
+      message: error.message 
+    })
+  }
 })
 
 export default router
