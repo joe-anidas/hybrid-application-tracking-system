@@ -12,6 +12,7 @@ import profileRoutes from './routes/profileRoutes.js'
 import applicationRoutes from './routes/applicationRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import auditLogRoutes from './routes/auditLogRoutes.js'
+import botMimicRoutes from './routes/botMimicRoutes.js'
 import { createDemoUsers } from './config/seedDemoUsers.js'
 import { createDemoJobs } from './config/seedDemoJobs.js'
 
@@ -64,6 +65,7 @@ app.use('/api/profile', profileRoutes)
 app.use('/api/applications', applicationRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/audit-logs', auditLogRoutes)
+app.use('/api/bot-mimic', botMimicRoutes)
 
 // Serve uploaded files with authentication
 app.get('/uploads/resumes/:filename', (req, res) => {

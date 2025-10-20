@@ -53,7 +53,12 @@ const applicationSchema = new mongoose.Schema(
       ref: 'User'
     },
     reviewedAt: Date,
-    notes: String
+    notes: String,
+    botProcessedAt: Date,
+    botProcessedCount: {
+      type: Number,
+      default: 0
+    }
   },
   { timestamps: true }
 )
