@@ -66,5 +66,14 @@ applicationSchema.index({ applicant: 1, createdAt: -1 })
 applicationSchema.index({ job: 1, status: 1 })
 applicationSchema.index({ status: 1, createdAt: -1 })
 
+// Virtual field for submittedAt (alias for createdAt for consistency)
+applicationSchema.virtual('submittedAt').get(function() {
+  return this.createdAt
+})
+
+// Ensure virtual fields are included when converting to JSON
+applicationSchema.set('toJSON', { virtuals: true })
+applicationSchema.set('toObject', { virtuals: true })
+
 const Application = mongoose.model('Application', applicationSchema)
 export default Application

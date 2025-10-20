@@ -33,6 +33,42 @@ export default function ReviewApplications() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [updatingStatus, setUpdatingStatus] = useState(null)
 
+  // Helper function to safely format dates
+  const formatDate = (date) => {
+    if (!date) return 'N/A'
+    try {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    } catch (error) {
+      console.error('Error formatting date:', date, error)
+      return 'Invalid Date'
+    }
+  }
+
+  const formatDateTime = (date) => {
+    if (!date) return 'N/A'
+    try {
+      return new Date(date).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch (error) {
+      console.error('Error formatting date time:', date, error)
+      return 'Invalid Date'
+    }
+  }
+
+  // Get submission date from application (handles both submittedAt and createdAt)
+  const getSubmissionDate = (application) => {
+    return application.submittedAt || application.createdAt || application.appliedAt
+  }
+
   useEffect(() => {
     fetchApplications()
   }, [])
@@ -44,9 +80,12 @@ export default function ReviewApplications() {
   const fetchApplications = async () => {
     try {
       setLoading(true)
+      setError(null)
       const response = await getAllApplications()
+      console.log('Applications response:', response)
       setApplications(response.applications || [])
     } catch (err) {
+      console.error('Error fetching applications:', err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -77,7 +116,9 @@ export default function ReviewApplications() {
   const handleStatusChange = async (applicationId, newStatus) => {
     try {
       setUpdatingStatus(applicationId)
-      await updateApplicationStatus(applicationId, newStatus)
+      console.log('Updating status:', applicationId, newStatus)
+      const response = await updateApplicationStatus(applicationId, newStatus)
+      console.log('Status update response:', response)
       
       // Update local state
       setApplications(prev =>
@@ -91,6 +132,7 @@ export default function ReviewApplications() {
         setSelectedApplication(prev => ({ ...prev, status: newStatus }))
       }
     } catch (err) {
+      console.error('Error updating status:', err)
       alert('Failed to update status: ' + err.message)
     } finally {
       setUpdatingStatus(null)
@@ -106,6 +148,7 @@ export default function ReviewApplications() {
   }
 
   const handleViewApplication = (application) => {
+    console.log('Viewing application:', application)
     setSelectedApplication(application)
     setShowModal(true)
   }
@@ -234,7 +277,7 @@ export default function ReviewApplications() {
                         <div className="text-sm text-gray-900">{application.job?.department || 'N/A'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(application.submittedAt).toLocaleDateString()}
+                        {formatDate(getSubmissionDate(application))}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[application.status]}`}>
@@ -436,7 +479,7 @@ export default function ReviewApplications() {
                             {selectedApplication.job?.department} • {selectedApplication.job?.location}
                           </p>
                           <div className="mt-2 flex items-center gap-4 text-xs text-gray-600">
-                            <span>Submitted: {new Date(selectedApplication.submittedAt).toLocaleDateString()}</span>
+                            <span>Submitted: {formatDateTime(getSubmissionDate(selectedApplication))}</span>
                           </div>
                         </div>
 
@@ -478,9 +521,7 @@ export default function ReviewApplications() {
                           <div>
                             <p className="text-xs text-gray-500">Available Start Date</p>
                             <p className="text-sm font-medium text-gray-900">
-                              {selectedApplication.availableStartDate
-                                ? new Date(selectedApplication.availableStartDate).toLocaleDateString()
-                                : 'N/A'}
+                              {formatDate(selectedApplication.availableStartDate)}
                             </p>
                           </div>
                           <div>

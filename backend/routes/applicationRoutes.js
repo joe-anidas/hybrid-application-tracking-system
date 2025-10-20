@@ -384,7 +384,7 @@ router.get('/admin/all', authenticateToken, async (req, res) => {
       .populate('applicant', 'name email')
       .populate('job', 'title department location company salaryRange')
       .populate('profile')
-      .sort({ submittedAt: -1 })
+      .sort({ createdAt: -1 })
 
     res.json({
       success: true,
