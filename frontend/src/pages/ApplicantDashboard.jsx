@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, CheckCircle, User, Edit, ChevronRight, Eye, ExternalLink, Users } from 'lucide-react'
-import DashboardLayout from '../components/DashboardLayout'
 import { getProfile } from '../services/profile'
 import { getMyApplications } from '../services/applications'
 
@@ -85,66 +84,54 @@ const ApplicantDashboard = () => {
 
   if (loading) {
     return (
-      <DashboardLayout title="Applicant Dashboard">
+      <div className="min-h-screen bg-gray-50 p-6">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <DashboardLayout title="Applicant Dashboard">
+      <div className="min-h-screen bg-gray-50 p-6">
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="text-red-700">Error loading dashboard: {error}</div>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
+  const applicantName = profile?.fullName || 'Applicant'
+
   return (
-    <DashboardLayout title="Applicant Dashboard">
-      <div className="space-y-6">
-        {/* Profile Completion Card */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Welcome Message */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center mb-2">
-                <User className="h-6 w-6 mr-2" />
-                <h3 className="text-xl font-semibold">Your Profile</h3>
-              </div>
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm">Profile Completion</span>
-                  <span className="text-lg font-bold">{profileCompletion}%</span>
-                </div>
-                <div className="w-full bg-white bg-opacity-30 rounded-full h-3">
-                  <div 
-                    className="bg-white h-3 rounded-full transition-all duration-500"
-                    style={{ width: `${profileCompletion}%` }}
-                  ></div>
-                </div>
-              </div>
-              {profileCompletion < 100 ? (
-                <p className="text-sm text-indigo-100">
-                  Complete your profile to increase your chances of getting hired!
-                </p>
-              ) : (
-                <p className="text-sm text-indigo-100 flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Your profile is complete and ready for applications!
-                </p>
-              )}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Welcome, {applicantName}!
+              </h2>
+              <p className="text-gray-600 mt-1">
+                Track your applications and manage your profile from here.
+              </p>
             </div>
-            <button
-              onClick={() => navigate('/profile')}
-              className="ml-6 px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-indigo-50 transition-colors flex items-center"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              {profileCompletion < 100 ? 'Complete Profile' : 'Edit Profile'}
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </button>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-sm text-gray-600">Profile Completion</div>
+                <div className="text-2xl font-bold text-indigo-600">{profileCompletion}%</div>
+              </div>
+              <button
+                onClick={() => navigate('/profile')}
+                className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors flex items-center"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                {profileCompletion < 100 ? 'Complete Profile' : 'Edit Profile'}
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -263,7 +250,7 @@ const ApplicantDashboard = () => {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
 
