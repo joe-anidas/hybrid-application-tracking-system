@@ -14,6 +14,7 @@ import ApplicantProfile from './pages/ApplicantProfile.jsx'
 import ApplicantDashboard from './pages/ApplicantDashboard.jsx'
 import ApplicationReview from './pages/ApplicationReview.jsx'
 import BotMimicDashboard from './pages/BotMimicDashboard.jsx'
+import ManageUsers from './pages/ManageUsers.jsx'
 import reactLogo from './assets/react.svg'
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -284,6 +285,14 @@ function AppContent() {
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
               <ReviewApplications />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/manage-users" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <ManageUsers />
             </ProtectedRoute>
           } 
         />

@@ -46,3 +46,6 @@ export const requireRole = (roles) => {
 
 // Export alias for compatibility
 export const authenticateToken = requireAuth
+
+// Convenience middleware for admin-only routes
+export const requireAdmin = requireRole('Admin')
