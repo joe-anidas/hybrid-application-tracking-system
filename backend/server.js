@@ -4,7 +4,9 @@ import mongoose from "mongoose";
 import cors from "cors";
 import authRoutes from './routes/authRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
+import jobRoutes from './routes/jobRoutes.js'
 import { createDemoUsers } from './config/seedDemoUsers.js'
+import { createDemoJobs } from './config/seedDemoJobs.js'
 
 const app = express();
 
@@ -39,12 +41,15 @@ mongoose
     console.log("✅ MongoDB connected")
     // Create demo users for testing
     await createDemoUsers()
+    // Create demo jobs for testing
+    await createDemoJobs()
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Mount routes
 app.use('/api/auth', authRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/jobs', jobRoutes)
 
 // ✅ Start server
 const PORT = process.env.PORT || 3000;

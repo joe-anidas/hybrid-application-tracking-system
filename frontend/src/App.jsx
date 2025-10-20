@@ -3,7 +3,10 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Home from './pages/Home.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
-import Admin from './pages/Admin.jsx'
+import Admin from './pages/AdminDashboard.jsx'
+import CreateJob from './pages/CreateJob.jsx'
+import Jobs from './pages/Jobs.jsx'
+import JobDetails from './pages/JobDetails.jsx'
 import ApplicantDashboard from './pages/ApplicantDashboard.jsx'
 import BotMimicDashboard from './pages/BotMimicDashboard.jsx'
 import reactLogo from './assets/react.svg'
@@ -51,6 +54,9 @@ function AppContent() {
             <span className="font-semibold tracking-tight">Hybrid ATS</span>
           </Link>
           <div className="flex items-center gap-6 text-sm text-slate-600">
+            <Link to="/jobs" className="hover:text-slate-900 font-medium">
+              Jobs
+            </Link>
             {user ? (
               <>
                 <span className="text-slate-900 font-medium">{user.name} ({user.role})</span>
@@ -75,11 +81,21 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/jobs" element={<Jobs />} />
+        <Route path="/jobs/:id" element={<JobDetails />} />
         <Route 
           path="/admin" 
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
               <Admin />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/create-job" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <CreateJob />
             </ProtectedRoute>
           } 
         />

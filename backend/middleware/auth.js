@@ -14,7 +14,12 @@ export const requireAuth = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ error: 'User not found' })
     }
-    req.user = user
+    // Add both user object and convenient id/role fields
+    req.user = {
+      ...user.toObject(),
+      id: user._id.toString(),
+      role: user.role
+    }
     next()
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token' })
@@ -38,3 +43,6 @@ export const requireRole = (roles) => {
     next()
   }
 }
+
+// Export alias for compatibility
+export const authenticateToken = requireAuth
