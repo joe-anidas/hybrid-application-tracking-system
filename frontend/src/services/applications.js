@@ -80,3 +80,40 @@ export const withdrawApplication = async (applicationId) => {
     throw error
   }
 }
+
+// Admin: Get all applications
+export const getAllApplications = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams(filters).toString()
+    const url = `${API_BASE_URL}/api/applications/admin/all${queryParams ? `?${queryParams}` : ''}`
+    return await makeAuthenticatedRequest(url)
+  } catch (error) {
+    console.error('Error fetching all applications:', error)
+    throw error
+  }
+}
+
+// Admin: Update application status
+export const updateApplicationStatus = async (applicationId, status) => {
+  try {
+    return await makeAuthenticatedRequest(`${API_BASE_URL}/api/applications/admin/${applicationId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    })
+  } catch (error) {
+    console.error('Error updating application status:', error)
+    throw error
+  }
+}
+
+// Download resume
+export const downloadResume = (resumeUrl) => {
+  const token = getAuthToken()
+  if (!token) {
+    throw new Error('No authentication token found')
+  }
+  
+  // Open resume URL with authentication
+  const fullUrl = `${API_BASE_URL}${resumeUrl}?token=${token}`
+  window.open(fullUrl, '_blank')
+}

@@ -2,6 +2,9 @@ import 'dotenv/config';
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+import path from 'path'
+import { fileURLToPath } from 'url'
+import jwt from 'jsonwebtoken'
 import authRoutes from './routes/authRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
@@ -9,6 +12,9 @@ import profileRoutes from './routes/profileRoutes.js'
 import applicationRoutes from './routes/applicationRoutes.js'
 import { createDemoUsers } from './config/seedDemoUsers.js'
 import { createDemoJobs } from './config/seedDemoJobs.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const app = express();
 
@@ -55,7 +61,38 @@ app.use('/api/jobs', jobRoutes)
 app.use('/api/profile', profileRoutes)
 app.use('/api/applications', applicationRoutes)
 
-// Serve uploaded files
+// Serve uploaded files with authentication
+app.get('/uploads/resumes/:filename', (req, res) => {
+  try {
+    // Get token from query parameter or Authorization header
+    const token = req.query.token || req.headers.authorization?.split(' ')[1]
+    
+    if (!token) {
+      return res.status(401).json({ message: 'Authentication required' })
+    }
+
+    // Verify token
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: 'Invalid or expired token' })
+      }
+
+      // Token is valid, serve the file
+      const filePath = path.join(__dirname, 'uploads', 'resumes', req.params.filename)
+      res.sendFile(filePath, (err) => {
+        if (err) {
+          console.error('Error sending file:', err)
+          res.status(404).json({ message: 'File not found' })
+        }
+      })
+    })
+  } catch (error) {
+    console.error('Error serving resume:', error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+// Serve other static files (if needed)
 app.use('/uploads', express.static('uploads'))
 
 // ✅ Start server

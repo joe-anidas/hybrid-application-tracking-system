@@ -358,4 +358,116 @@ router.get('/job/:jobId', authenticateToken, async (req, res) => {
   }
 })
 
+// Get all applications (Admin only)
+router.get('/admin/all', authenticateToken, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only admins can view all applications'
+      })
+    }
+
+    const { status, jobId } = req.query
+    const filter = {}
+
+    if (status) {
+      filter.status = status
+    }
+
+    if (jobId) {
+      filter.job = jobId
+    }
+
+    const applications = await Application.find(filter)
+      .populate('applicant', 'name email')
+      .populate('job', 'title department location company salaryRange')
+      .populate('profile')
+      .sort({ submittedAt: -1 })
+
+    res.json({
+      success: true,
+      applications,
+      count: applications.length
+    })
+
+  } catch (error) {
+    console.error('Error fetching all applications:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    })
+  }
+})
+
+// Update application status (Admin only)
+router.put('/admin/:id/status', authenticateToken, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'Admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only admins can update application status'
+      })
+    }
+
+    const { status } = req.body
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status is required'
+      })
+    }
+
+    const validStatuses = ['submitted', 'under-review', 'shortlisted', 'accepted', 'rejected']
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status value'
+      })
+    }
+
+    const application = await Application.findById(req.params.id)
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: 'Application not found'
+      })
+    }
+
+    application.status = status
+    await application.save()
+
+    await application.populate([
+      { path: 'applicant', select: 'name email' },
+      { path: 'job', select: 'title department location' },
+      { path: 'profile' }
+    ])
+
+    res.json({
+      success: true,
+      message: 'Application status updated successfully',
+      application
+    })
+
+  } catch (error) {
+    console.error('Error updating application status:', error)
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid application ID'
+      })
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    })
+  }
+})
+
 export default router

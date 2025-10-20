@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Admin from './pages/AdminDashboard.jsx'
 import CreateJob from './pages/CreateJob.jsx'
+import ReviewApplications from './pages/ReviewApplications.jsx'
 import Jobs from './pages/Jobs.jsx'
 import JobDetails from './pages/JobDetails.jsx'
 import JobApplication from './pages/JobApplication.jsx'
@@ -114,6 +115,14 @@ function AppContent() {
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
               <CreateJob />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/review-applications" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <ReviewApplications />
             </ProtectedRoute>
           } 
         />
