@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Briefcase, DollarSign, Clock, Calendar, Users } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 import { getJobById } from '../services/jobs'
+import { getProfile } from '../services/profile'
 
 export default function JobDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuth()
   const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [profileComplete, setProfileComplete] = useState(false)
+  const [checkingProfile, setCheckingProfile] = useState(false)
 
   useEffect(() => {
     fetchJobDetails()
@@ -45,6 +50,60 @@ export default function JobDetails() {
       day: 'numeric', 
       year: 'numeric' 
     })
+  }
+
+  const checkProfileCompletion = (profile) => {
+    if (!profile) return false
+    
+    const requiredFields = [
+      profile.fullName,
+      profile.email,
+      profile.phone,
+      profile.location,
+      profile.summary,
+      profile.education && profile.education[0]?.degree,
+      profile.experience && profile.experience[0]?.title,
+      profile.skills && profile.skills.length > 0
+    ]
+    
+    return requiredFields.every(field => field)
+  }
+
+  const handleApplyClick = async () => {
+    // Check if user is logged in
+    if (!isAuthenticated) {
+      // Redirect to login with return URL
+      navigate(`/login?redirect=/jobs/${id}`)
+      return
+    }
+
+    // Check if user is an applicant
+    if (user?.role !== 'Applicant') {
+      setError('Only applicants can apply for jobs')
+      return
+    }
+
+    // Check profile completion
+    setCheckingProfile(true)
+    try {
+      const response = await getProfile()
+      const isComplete = checkProfileCompletion(response.profile)
+      setProfileComplete(isComplete)
+      
+      if (isComplete) {
+        // Profile is complete, go to application form
+        navigate(`/jobs/${id}/apply`)
+      } else {
+        // Profile is incomplete, redirect to profile page
+        navigate('/profile?message=complete-profile')
+      }
+    } catch (err) {
+      console.error('Error checking profile:', err)
+      // If profile doesn't exist, redirect to profile page
+      navigate('/profile?message=create-profile')
+    } finally {
+      setCheckingProfile(false)
+    }
   }
 
   const getJobTypeBadgeColor = (jobType) => {
@@ -165,8 +224,12 @@ export default function JobDetails() {
 
           {/* Apply Button */}
           <div className="pt-6 border-t border-gray-200">
-            <button className="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-              Apply for this position
+            <button 
+              onClick={handleApplyClick}
+              disabled={checkingProfile}
+              className="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
+            >
+              {checkingProfile ? 'Checking profile...' : 'Apply for this position'}
             </button>
             {job.applicants > 0 && (
               <div className="mt-3 flex items-center text-sm text-gray-600">
@@ -222,8 +285,12 @@ export default function JobDetails() {
         <div className="bg-white rounded-lg shadow-sm p-6 text-center">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Interested in this role?</h3>
           <p className="text-gray-600 mb-4">Join our team and help build the future</p>
-          <button className="px-8 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-            Apply Now
+          <button 
+            onClick={handleApplyClick}
+            disabled={checkingProfile}
+            className="px-8 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
+          >
+            {checkingProfile ? 'Checking profile...' : 'Apply Now'}
           </button>
         </div>
       </div>

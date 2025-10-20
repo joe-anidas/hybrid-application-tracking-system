@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
-import { FileText, Clock, Calendar, CheckCircle, XCircle } from 'lucide-react'
+import { FileText, Clock, Calendar, CheckCircle, XCircle, User, Edit, ChevronRight } from 'lucide-react'
 import DashboardLayout from '../components/DashboardLayout'
 import { getApplicantDashboard } from '../services/dashboard'
+import { getProfile } from '../services/profile'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
@@ -25,7 +27,10 @@ const StatCard = ({ icon: Icon, title, value, color = 'indigo' }) => (
 )
 
 const ApplicantDashboard = () => {
+  const navigate = useNavigate()
   const [dashboardData, setDashboardData] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [profileCompletion, setProfileCompletion] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -33,8 +38,18 @@ const ApplicantDashboard = () => {
     const fetchDashboard = async () => {
       try {
         setLoading(true)
-        const data = await getApplicantDashboard()
-        setDashboardData(data)
+        const [dashData, profileData] = await Promise.all([
+          getApplicantDashboard(),
+          getProfile()
+        ])
+        setDashboardData(dashData)
+        setProfile(profileData.profile)
+        
+        // Calculate profile completion
+        if (profileData.profile) {
+          const completion = calculateProfileCompletion(profileData.profile)
+          setProfileCompletion(completion)
+        }
       } catch (err) {
         setError(err.message)
       } finally {
@@ -44,6 +59,24 @@ const ApplicantDashboard = () => {
 
     fetchDashboard()
   }, [])
+
+  const calculateProfileCompletion = (profile) => {
+    if (!profile) return 0
+    
+    const fields = [
+      profile.fullName,
+      profile.email,
+      profile.phone,
+      profile.location,
+      profile.summary,
+      profile.education && profile.education[0]?.degree,
+      profile.experience && profile.experience[0]?.title,
+      profile.skills && profile.skills.length > 0
+    ]
+    
+    const completed = fields.filter(field => field).length
+    return Math.round((completed / fields.length) * 100)
+  }
 
   if (loading) {
     return (
@@ -88,6 +121,48 @@ const ApplicantDashboard = () => {
   return (
     <DashboardLayout title="Applicant Dashboard">
       <div className="space-y-6">
+        {/* Profile Completion Card */}
+        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <User className="h-6 w-6 mr-2" />
+                <h3 className="text-xl font-semibold">Your Profile</h3>
+              </div>
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm">Profile Completion</span>
+                  <span className="text-lg font-bold">{profileCompletion}%</span>
+                </div>
+                <div className="w-full bg-white bg-opacity-30 rounded-full h-3">
+                  <div 
+                    className="bg-white h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${profileCompletion}%` }}
+                  ></div>
+                </div>
+              </div>
+              {profileCompletion < 100 ? (
+                <p className="text-sm text-indigo-100">
+                  Complete your profile to increase your chances of getting hired!
+                </p>
+              ) : (
+                <p className="text-sm text-indigo-100 flex items-center">
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Your profile is complete and ready for applications!
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => navigate('/profile')}
+              className="ml-6 px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-indigo-50 transition-colors flex items-center"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              {profileCompletion < 100 ? 'Complete Profile' : 'Edit Profile'}
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </button>
+          </div>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard

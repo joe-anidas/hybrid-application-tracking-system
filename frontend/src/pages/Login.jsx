@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import auth from '../services/auth'
 
@@ -8,7 +8,10 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { login } = useAuth()
+  
+  const redirectUrl = searchParams.get('redirect')
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -17,7 +20,13 @@ export default function Login() {
       const data = await auth.login({ email, password })
       login(data.user, data.token)
       
-      // Route based on user role
+      // If there's a redirect URL, go there
+      if (redirectUrl) {
+        navigate(redirectUrl)
+        return
+      }
+      
+      // Otherwise, route based on user role
       switch (data.user.role) {
         case 'Admin':
           navigate('/admin')

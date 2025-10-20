@@ -7,6 +7,8 @@ import Admin from './pages/AdminDashboard.jsx'
 import CreateJob from './pages/CreateJob.jsx'
 import Jobs from './pages/Jobs.jsx'
 import JobDetails from './pages/JobDetails.jsx'
+import JobApplication from './pages/JobApplication.jsx'
+import ApplicantProfile from './pages/ApplicantProfile.jsx'
 import ApplicantDashboard from './pages/ApplicantDashboard.jsx'
 import BotMimicDashboard from './pages/BotMimicDashboard.jsx'
 import reactLogo from './assets/react.svg'
@@ -83,6 +85,22 @@ function AppContent() {
         <Route path="/register" element={<Register />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/:id" element={<JobDetails />} />
+        <Route 
+          path="/jobs/:id/apply" 
+          element={
+            <ProtectedRoute allowedRoles={['Applicant']}>
+              <JobApplication />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute allowedRoles={['Applicant']}>
+              <ApplicantProfile />
+            </ProtectedRoute>
+          } 
+        />
         <Route 
           path="/admin" 
           element={

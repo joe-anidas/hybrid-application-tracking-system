@@ -5,6 +5,8 @@ import cors from "cors";
 import authRoutes from './routes/authRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
+import profileRoutes from './routes/profileRoutes.js'
+import applicationRoutes from './routes/applicationRoutes.js'
 import { createDemoUsers } from './config/seedDemoUsers.js'
 import { createDemoJobs } from './config/seedDemoJobs.js'
 
@@ -50,6 +52,11 @@ mongoose
 app.use('/api/auth', authRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/jobs', jobRoutes)
+app.use('/api/profile', profileRoutes)
+app.use('/api/applications', applicationRoutes)
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'))
 
 // ✅ Start server
 const PORT = process.env.PORT || 3000;
