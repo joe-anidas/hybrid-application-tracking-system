@@ -1,6 +1,7 @@
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import Footer from './components/Footer.jsx'
 import Home from './pages/Home.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
@@ -245,8 +246,9 @@ function AppContent() {
         </nav>
       </header>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/jobs" element={<Jobs />} />
@@ -347,7 +349,11 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
-      </Routes>
+        </Routes>
+      </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

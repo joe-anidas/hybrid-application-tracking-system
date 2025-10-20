@@ -99,17 +99,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-slate-500 flex items-center justify-between">
-          <p>© {new Date().getFullYear()} Hybrid ATS</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-slate-700">Privacy</a>
-            <a href="#" className="hover:text-slate-700">Terms</a>
-          </div>
-        </div>
-      </footer>
     </>
   )
 }
