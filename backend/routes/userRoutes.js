@@ -4,6 +4,7 @@ import User from '../models/User.js'
 import ApplicantProfile from '../models/ApplicantProfile.js'
 import Application from '../models/Application.js'
 import bcrypt from 'bcryptjs'
+import { createAuditLog, getClientIp } from '../utils/auditLogger.js'
 
 const router = Router()
 
@@ -69,6 +70,20 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
     await user.save()
 
+    // Log the user creation
+    await createAuditLog({
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: req.user.role,
+      action: 'USER_CREATED',
+      actionDescription: `Admin ${req.user.name} created ${role} user: ${name}`,
+      targetType: 'User',
+      targetId: user._id,
+      targetName: name,
+      ipAddress: getClientIp(req),
+      metadata: { createdRole: role, createdEmail: email }
+    })
+
     // Return user without password
     const userResponse = user.toObject()
     delete userResponse.passwordHash
@@ -111,6 +126,20 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
 
     // Delete the user
     await User.findByIdAndDelete(id)
+
+    // Log the deletion
+    await createAuditLog({
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: req.user.role,
+      action: 'USER_DELETED',
+      actionDescription: `Admin ${req.user.name} deleted ${user.role} user: ${user.name}`,
+      targetType: 'User',
+      targetId: id,
+      targetName: user.name,
+      ipAddress: getClientIp(req),
+      metadata: { deletedRole: user.role, deletedEmail: user.email }
+    })
 
     res.json({ 
       message: `${user.role} account${user.role === 'Applicant' ? ' and associated data' : ''} deleted successfully` 

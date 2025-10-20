@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import { createAuditLog, getClientIp } from '../utils/auditLogger.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me'
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
@@ -33,6 +34,19 @@ export const register = async (req, res) => {
     })
 
     const token = jwt.sign({ sub: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+
+    // Log the registration
+    await createAuditLog({
+      userId: user._id,
+      userName: user.name,
+      userRole: user.role,
+      action: 'USER_REGISTER',
+      actionDescription: `${user.name} registered as ${user.role}`,
+      targetType: 'User',
+      targetId: user._id,
+      targetName: user.name,
+      ipAddress: getClientIp(req)
+    })
 
     res.status(201).json({
       message: 'Registered successfully',
@@ -70,6 +84,17 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign({ sub: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+
+    // Log the login
+    await createAuditLog({
+      userId: user._id,
+      userName: user.name,
+      userRole: user.role,
+      action: 'USER_LOGIN',
+      actionDescription: `${user.name} logged in as ${user.role}`,
+      targetType: 'Auth',
+      ipAddress: getClientIp(req)
+    })
 
     res.json({
       message: 'Logged in successfully',
