@@ -94,11 +94,15 @@ export const getAllApplications = async (filters = {}) => {
 }
 
 // Admin: Update application status
-export const updateApplicationStatus = async (applicationId, status) => {
+export const updateApplicationStatus = async (applicationId, status, notes) => {
   try {
+    const body = {}
+    if (status !== undefined) body.status = status
+    if (notes !== undefined) body.notes = notes
+    
     return await makeAuthenticatedRequest(`${API_BASE_URL}/api/applications/admin/${applicationId}/status`, {
       method: 'PUT',
-      body: JSON.stringify({ status })
+      body: JSON.stringify(body)
     })
   } catch (error) {
     console.error('Error updating application status:', error)

@@ -413,21 +413,25 @@ router.put('/admin/:id/status', authenticateToken, async (req, res) => {
       })
     }
 
-    const { status } = req.body
+    const { status, notes } = req.body
 
-    if (!status) {
+    // At least one field should be provided
+    if (!status && notes === undefined) {
       return res.status(400).json({
         success: false,
-        message: 'Status is required'
+        message: 'Status or notes is required'
       })
     }
 
-    const validStatuses = ['submitted', 'under-review', 'shortlisted', 'accepted', 'rejected']
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status value'
-      })
+    // Validate status if provided
+    if (status) {
+      const validStatuses = ['submitted', 'under-review', 'shortlisted', 'accepted', 'rejected']
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid status value'
+        })
+      }
     }
 
     const application = await Application.findById(req.params.id)
@@ -439,34 +443,32 @@ router.put('/admin/:id/status', authenticateToken, async (req, res) => {
       })
     }
 
-    application.status = status
+    // Update fields if provided
+    if (status) {
+      application.status = status
+    }
+    if (notes !== undefined) {
+      application.notes = notes
+    }
+    
     await application.save()
 
     await application.populate([
       { path: 'applicant', select: 'name email' },
-      { path: 'job', select: 'title department location' },
+      { path: 'job', select: 'title department location type' },
       { path: 'profile' }
     ])
 
     res.json({
       success: true,
-      message: 'Application status updated successfully',
+      message: 'Application updated successfully',
       application
     })
-
   } catch (error) {
     console.error('Error updating application status:', error)
-    
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid application ID'
-      })
-    }
-
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Failed to update application'
     })
   }
 })
