@@ -49,8 +49,8 @@ export default function Admin() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
@@ -61,8 +61,8 @@ export default function Admin() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="text-red-700">Error loading dashboard: {error}</div>
           </div>
@@ -74,8 +74,8 @@ export default function Admin() {
   const { stats } = dashboardData
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title */}
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -93,8 +93,9 @@ export default function Admin() {
             View Analytics
           </button>
         </div>
+        
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5 mb-6">
           <StatCard
             icon={FileText}
             title="Total Applications"
@@ -128,7 +129,7 @@ export default function Admin() {
         </div>
 
         {/* Action Buttons - Bigger and more prominent */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <button 
             onClick={() => navigate('/admin/create-job')}
             className="flex flex-col items-center justify-center p-8 bg-white border-2 border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-indigo-500 transition-all group"

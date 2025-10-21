@@ -1,16 +1,57 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, CheckCircle, User, Edit, ChevronRight, Eye, ExternalLink, Users } from 'lucide-react'
+import { FileText, CheckCircle, User, Edit, ChevronRight, Eye, ExternalLink, Users, MessageSquare } from 'lucide-react'
 import { getProfile } from '../services/profile'
 import { getMyApplications } from '../services/applications'
+
+// Comment Tooltip Component
+const CommentTooltip = ({ comment }) => {
+  const [showTooltip, setShowTooltip] = useState(false)
+  
+  if (!comment) {
+    return <span className="text-gray-400 italic text-xs">No comments</span>
+  }
+
+  // Truncate to first 2 words
+  const words = comment.trim().split(/\s+/)
+  const truncated = words.slice(0, 2).join(' ')
+  const shouldTruncate = words.length > 2
+
+  return (
+    <div className="relative inline-block">
+      <div
+        className="flex items-center gap-0.5 cursor-pointer"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <MessageSquare className="h-3 w-3 text-gray-400 flex-shrink-0" />
+        <span className="text-xs text-gray-900">
+          {truncated}{shouldTruncate && '...'}
+        </span>
+      </div>
+      
+      {/* Tooltip Popup */}
+      {showTooltip && (
+        <div className="absolute z-50 left-0 top-full mt-2 w-72 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-3 animate-fadeIn">
+          <div className="font-semibold mb-1 text-gray-200">Feedback:</div>
+          <div className="text-gray-100 leading-relaxed whitespace-pre-wrap break-words">
+            {comment}
+          </div>
+          {/* Arrow */}
+          <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const STATUS_COLORS = {
   submitted: 'bg-blue-100 text-blue-800',
   'under-review': 'bg-yellow-100 text-yellow-800',
-  shortlisted: 'bg-green-100 text-green-800',
+  shortlisted: 'bg-purple-100 text-purple-800',
   rejected: 'bg-red-100 text-red-800',
   withdrawn: 'bg-gray-100 text-gray-800',
-  accepted: 'bg-purple-100 text-purple-800'
+  accepted: 'bg-green-100 text-green-800'
 }
 
 const ApplicantDashboard = () => {
@@ -84,9 +125,11 @@ const ApplicantDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
         </div>
       </div>
     )
@@ -94,9 +137,11 @@ const ApplicantDashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-700">Error loading dashboard: {error}</div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="text-red-700">Error loading dashboard: {error}</div>
+          </div>
         </div>
       </div>
     )
@@ -105,10 +150,10 @@ const ApplicantDashboard = () => {
   const applicantName = profile?.fullName || 'Applicant'
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Message */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
@@ -136,7 +181,7 @@ const ApplicantDashboard = () => {
         </div>
 
         {/* My Applications Section */}
-        <div className="bg-white shadow rounded-lg overflow-hidden mt-6">
+        <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
               <FileText className="h-5 w-5 mr-2 text-indigo-600" />
@@ -180,7 +225,7 @@ const ApplicantDashboard = () => {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                       Comments
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -227,10 +272,8 @@ const ApplicantDashboard = () => {
                           {application.status?.replace('-', ' ') || 'Unknown'}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900 max-w-xs truncate" title={application.notes || ''}>
-                          {application.notes || <span className="text-gray-400 italic">No comments</span>}
-                        </div>
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <CommentTooltip comment={application.notes} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button

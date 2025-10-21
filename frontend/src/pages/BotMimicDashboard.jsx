@@ -154,8 +154,8 @@ const BotMimicDashboard = () => {
 
   if (loading && !stats) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
@@ -165,8 +165,8 @@ const BotMimicDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
@@ -176,20 +176,21 @@ const BotMimicDashboard = () => {
           <p className="mt-2 text-gray-600">Automated processing system for technical role applications</p>
         </div>
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
             <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
             <p className="text-green-800">{successMessage}</p>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center mb-6">
             <AlertCircle className="h-5 w-5 text-red-600 mr-3" />
             <p className="text-red-800">{error}</p>
           </div>
         )}
 
-        <div className="bg-white shadow rounded-lg p-6">
+        {/* Control Panel */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900">Control Panel</h2>
@@ -228,7 +229,7 @@ const BotMimicDashboard = () => {
           </div>
 
           {autoProcessEnabled && (
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-center">
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-center mt-4">
               <Zap className="h-5 w-5 text-blue-600 mr-2 animate-pulse" />
               <p className="text-sm text-blue-800">
                 Auto-processing is active. Processing up to 5 applications every 30 seconds.
@@ -237,7 +238,8 @@ const BotMimicDashboard = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5 mb-6">
           <StatCard
             icon={Briefcase}
             title="Total Applications"
@@ -275,6 +277,7 @@ const BotMimicDashboard = () => {
           />
         </div>
 
+        {/* Applications and Activity Tabs */}
         <div className="bg-white shadow rounded-lg">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
