@@ -1,0 +1,784 @@
+{
+  "info": {
+    "name": "Hybrid Application Tracking System API",
+    "_postman_id": "ats-api-collection",
+    "description": "Complete API collection for the Hybrid Application Tracking System - A MERN stack application for managing job applications with automated (Bot Mimic) and manual (Admin) workflows.\n\n## Demo Credentials\n\n| Role | Email | Password |\n|------|-------|----------|\n| Admin | admin@demo.com | Admin@Demo2025!Secure |\n| Bot Mimic | bot@demo.com | BotMimic@Demo2025!Auto |\n| Applicant | applicant@demo.com | Applicant@Demo2025!Job |\n\n## Setup Instructions\n\n1. Import this collection into Postman\n2. Set the `baseUrl` variable in the environment (default: http://localhost:3000)\n3. Login using one of the demo credentials\n4. The token will be automatically saved for subsequent requests\n5. Test the API endpoints\n\n## Workflow\n\n1. **Authentication** - Register/Login to get JWT token\n2. **Profile** - Create applicant profile (required before applying)\n3. **Jobs** - Browse and search available jobs\n4. **Applications** - Submit applications to jobs\n5. **Bot Mimic** - Automated processing for technical roles\n6. **Admin** - Manual processing for non-technical roles\n7. **Dashboard** - View analytics and statistics\n8. **Audit Logs** - Track all system activities",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register New User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.token);",
+                  "    pm.collectionVariables.set('authToken', response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Test@123456\",\n  \"role\": \"Applicant\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new applicant user. Only Applicant role can be created via public registration."
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.token);",
+                  "    pm.collectionVariables.set('authToken', response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@demo.com\",\n  \"password\": \"Admin@Demo2025!Secure\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login as Admin user"
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Bot Mimic",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.token);",
+                  "    pm.collectionVariables.set('authToken', response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"bot@demo.com\",\n  \"password\": \"BotMimic@Demo2025!Auto\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login as Bot Mimic user for automated processing"
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Applicant",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('authToken', response.token);",
+                  "    pm.collectionVariables.set('authToken', response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"applicant@demo.com\",\n  \"password\": \"Applicant@Demo2025!Job\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login as Applicant user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Get current user profile (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Logout current user and log the action"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication and user management endpoints"
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "Get All Jobs",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/all?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "jobs", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "jobType",
+                  "value": "technical",
+                  "disabled": true
+                },
+                {
+                  "key": "department",
+                  "value": "Engineering",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all job postings (public endpoint - no authentication required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Job by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/:jobId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "jobs", ":jobId"],
+              "variable": [
+                {
+                  "key": "jobId",
+                  "value": "PUT_JOB_ID_HERE"
+                }
+              ]
+            },
+            "description": "Get specific job details by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Job (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Full Stack Developer\",\n  \"department\": \"Engineering\",\n  \"location\": \"Remote\",\n  \"type\": \"full-time\",\n  \"jobType\": \"technical\",\n  \"level\": \"senior\",\n  \"description\": \"We are looking for an experienced Full Stack Developer...\",\n  \"requirements\": \"5+ years of experience with React, Node.js, MongoDB...\",\n  \"responsibilities\": \"Design and develop scalable web applications...\",\n  \"salaryMin\": 100000,\n  \"salaryMax\": 150000,\n  \"skills\": [\"React\", \"Node.js\", \"MongoDB\", \"Express\", \"TypeScript\"],\n  \"benefits\": \"Health insurance, 401k, Remote work, Flexible hours\",\n  \"applicationDeadline\": \"2025-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "jobs", "create"]
+            },
+            "description": "Create new job posting (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Job (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Full Stack Developer (Updated)\",\n  \"salaryMax\": 160000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/:jobId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "jobs", ":jobId"],
+              "variable": [
+                {
+                  "key": "jobId",
+                  "value": "PUT_JOB_ID_HERE"
+                }
+              ]
+            },
+            "description": "Update existing job posting (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Job (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/jobs/:jobId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "jobs", ":jobId"],
+              "variable": [
+                {
+                  "key": "jobId",
+                  "value": "PUT_JOB_ID_HERE"
+                }
+              ]
+            },
+            "description": "Delete job posting (Admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Job posting management endpoints"
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Submit Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "jobId",
+                  "value": "PUT_JOB_ID_HERE",
+                  "type": "text"
+                },
+                {
+                  "key": "coverLetter",
+                  "value": "I am excited to apply for this position...",
+                  "type": "text"
+                },
+                {
+                  "key": "whyInterested",
+                  "value": "I am passionate about this field...",
+                  "type": "text"
+                },
+                {
+                  "key": "relevantExperience",
+                  "value": "I have 5 years of experience in...",
+                  "type": "text"
+                },
+                {
+                  "key": "availableStartDate",
+                  "value": "2025-11-01",
+                  "type": "text"
+                },
+                {
+                  "key": "salaryExpectation",
+                  "value": "120000",
+                  "type": "text"
+                },
+                {
+                  "key": "resume",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/submit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "submit"]
+            },
+            "description": "Submit job application with resume upload (Applicant only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "my"]
+            },
+            "description": "Get all applications for current user (Applicant only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Application by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/:applicationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", ":applicationId"],
+              "variable": [
+                {
+                  "key": "applicationId",
+                  "value": "PUT_APPLICATION_ID_HERE"
+                }
+              ]
+            },
+            "description": "Get specific application details"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Applications (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/all?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "submitted",
+                  "disabled": true
+                },
+                {
+                  "key": "jobType",
+                  "value": "technical",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all applications (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Application Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"under-review\",\n  \"comment\": \"Application is being reviewed by our team\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/:applicationId/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", ":applicationId", "status"],
+              "variable": [
+                {
+                  "key": "applicationId",
+                  "value": "PUT_APPLICATION_ID_HERE"
+                }
+              ]
+            },
+            "description": "Update application status (Admin/Bot Mimic only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Application submission and tracking endpoints"
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/profile/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profile", "my"]
+            },
+            "description": "Get current user's applicant profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+1234567890\",\n  \"location\": \"New York, NY\",\n  \"summary\": \"Experienced full stack developer with 5 years of experience...\",\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science in Computer Science\",\n      \"institution\": \"MIT\",\n      \"year\": \"2018\",\n      \"field\": \"Computer Science\"\n    }\n  ],\n  \"experience\": [\n    {\n      \"title\": \"Senior Developer\",\n      \"company\": \"Tech Corp\",\n      \"startDate\": \"2020-01\",\n      \"endDate\": \"2025-01\",\n      \"current\": true,\n      \"description\": \"Lead development of web applications...\"\n    }\n  ],\n  \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\"],\n  \"linkedin\": \"https://linkedin.com/in/johndoe\",\n  \"github\": \"https://github.com/johndoe\",\n  \"portfolio\": \"https://johndoe.dev\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profile/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profile", "create"]
+            },
+            "description": "Create applicant profile (Applicant only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"summary\": \"Updated professional summary...\",\n  \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\", \"TypeScript\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profile/update",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profile", "update"]
+            },
+            "description": "Update applicant profile (Applicant only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Applicant profile management endpoints"
+    },
+    {
+      "name": "Bot Mimic",
+      "item": [
+        {
+          "name": "Process Applications",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/process",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "process"]
+            },
+            "description": "Process technical role applications automatically (Bot Mimic only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Processing Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "stats"]
+            },
+            "description": "Get bot mimic processing statistics (Bot Mimic only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Automated application processing endpoints (Bot Mimic role)"
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Applicant Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/applicant",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "applicant"]
+            },
+            "description": "Get dashboard data for applicant"
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "admin"]
+            },
+            "description": "Get dashboard data for admin"
+          },
+          "response": []
+        },
+        {
+          "name": "Bot Mimic Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/bot-mimic",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "bot-mimic"]
+            },
+            "description": "Get dashboard data for bot mimic"
+          },
+          "response": []
+        },
+        {
+          "name": "Analytics Dashboard (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "analytics"]
+            },
+            "description": "Get comprehensive analytics data (Admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Dashboard and analytics endpoints"
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "all"]
+            },
+            "description": "Get all users (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "PUT_USER_ID_HERE"
+                }
+              ]
+            },
+            "description": "Get specific user details (Admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "User management endpoints (Admin only)"
+    },
+    {
+      "name": "Audit Logs",
+      "item": [
+        {
+          "name": "Get Audit Logs (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "audit-logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "action",
+                  "value": "APPLICATION_SUBMITTED",
+                  "disabled": true
+                },
+                {
+                  "key": "userRole",
+                  "value": "Applicant",
+                  "disabled": true
+                },
+                {
+                  "key": "userId",
+                  "value": "PUT_USER_ID",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get audit logs with filters (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Audit Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/audit-logs/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "audit-logs", "stats"]
+            },
+            "description": "Get audit log statistics (Admin only)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Audit trail and logging endpoints (Admin only)"
+    }
+  ]
+}

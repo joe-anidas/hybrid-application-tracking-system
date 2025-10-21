@@ -5,6 +5,8 @@ import cors from "cors";
 import path from 'path'
 import { fileURLToPath } from 'url'
 import jwt from 'jsonwebtoken'
+import swaggerUi from 'swagger-ui-express'
+import swaggerSpec from './config/swagger.js'
 import authRoutes from './routes/authRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
@@ -46,6 +48,22 @@ app.use(express.json()); // parse JSON body
 
 // ✅ Audit logging middleware - logs all API activity
 app.use(auditMiddleware)
+
+// ✅ Swagger API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customSiteTitle: 'ATS API Documentation',
+  customCss: '.swagger-ui .topbar { display: none }',
+  swaggerOptions: {
+    persistAuthorization: true,
+  }
+}))
+
+// Swagger JSON endpoint
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json')
+  res.send(swaggerSpec)
+})
 
 // ✅ MongoDB connection
 mongoose

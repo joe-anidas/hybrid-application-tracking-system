@@ -1,6 +1,31 @@
 # Hybrid Application Tracking System
 
+**MERN Engineer – Round 2 Assignment**
+
 A comprehensive full-stack application tracking system that handles both automated (technical roles) and manual (non-technical roles) application workflows with complete audit trails and role-based access control.
+
+---
+
+## 📋 Table of Contents
+- [Features](#-features-available)
+- [Technology Stack](#-technology-stack)
+- [Architecture](#-architecture)
+- [Getting Started](#-getting-started)
+- [API Documentation](#-api-documentation)
+- [Demo Credentials](#-demo-credentials)
+- [Deployment](#-deployment)
+- [Project Structure](#-project-structure)
+
+---
+
+## 🎯 Project Overview
+
+This system demonstrates a hybrid workflow where:
+- **Technical role applications** use automated tracking via Bot Mimic (simulating API-based systems)
+- **Non-technical role applications** require manual processing by Admin users
+- **Complete traceability** is maintained for all actions with timestamps and user attribution
+
+---
 
 ## 🚀 Features Available
 
@@ -226,6 +251,249 @@ A comprehensive full-stack application tracking system that handles both automat
   - Application count per user
 
 ## 🛠️ Technology Stack
+
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js v5
+- **Database**: MongoDB with Mongoose ODM v8
+- **Authentication**: JWT (jsonwebtoken v9)
+- **Password Security**: bcryptjs
+- **File Upload**: Multer (resume handling)
+- **API Documentation**: Swagger UI + Postman Collection
+- **Security**: CORS enabled
+- **Development**: Nodemon for hot reload
+
+### Frontend
+- **Framework**: React 19
+- **Build Tool**: Vite 7
+- **Styling**: Tailwind CSS 4 (with @tailwindcss/vite)
+- **Routing**: React Router DOM v6
+- **HTTP Client**: Axios v1.12
+- **Charts & Analytics**: Recharts v3
+- **Icons**: Lucide React
+- **Code Quality**: ESLint 9
+
+### Development Tools
+- **Version Control**: Git & GitHub
+- **API Testing**: Postman Collection included
+- **API Documentation**: Swagger/OpenAPI 3.0
+- **Deployment**: Vercel (Frontend), Vercel/Railway (Backend)
+
+---
+
+## 🏗️ Architecture
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Frontend (React)                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
+│  │ Applicant│  │   Admin  │  │   Bot    │  │  Public  │    │
+│  │Dashboard │  │Dashboard │  │  Mimic   │  │  Pages   │    │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘    │
+│       │             │             │             │            │
+│       └─────────────┴─────────────┴─────────────┘            │
+│                          │                                    │
+│                   React Router + AuthContext                  │
+└───────────────────────────┼───────────────────────────────────┘
+                            │
+                      Axios HTTP Client
+                            │
+┌───────────────────────────┼───────────────────────────────────┐
+│                    Backend (Express.js)                        │
+│                           │                                    │
+│  ┌────────────────────────┼────────────────────────────┐     │
+│  │             JWT Authentication Middleware            │     │
+│  └──────────────────────────┬───────────────────────────┘     │
+│                             │                                  │
+│  ┌──────────────────────────┴───────────────────────────┐    │
+│  │              Audit Logging Middleware                 │    │
+│  └──────────────────────────┬───────────────────────────┘    │
+│                             │                                  │
+│         ┌───────────────────┼───────────────────┐            │
+│         │                   │                   │            │
+│    ┌────▼────┐      ┌───────▼───────┐   ┌──────▼──────┐    │
+│    │   Auth  │      │   API Routes  │   │  Bot Mimic  │    │
+│    │  Routes │      │   (8 modules) │   │   Service   │    │
+│    └─────────┘      └───────┬───────┘   └──────┬──────┘    │
+│                             │                   │            │
+│         ┌───────────────────┼───────────────────┘            │
+│         │                                                     │
+│    ┌────▼─────────────────────────────────────┐             │
+│    │         Mongoose ODM (Data Layer)         │             │
+│    └────┬─────────────────────────────────────┬┘             │
+└─────────┼──────────────────────────────────────┼──────────────┘
+          │                                      │
+     ┌────▼────┐                          ┌─────▼─────┐
+     │ MongoDB │                          │  File     │
+     │Database │                          │  Storage  │
+     └─────────┘                          └───────────┘
+```
+
+### Data Flow
+
+#### 1. **Applicant Workflow**
+```
+User → Register/Login → Create Profile → Browse Jobs → Apply to Job → Track Status
+                                                                ↓
+                                                    Upload Resume (Multer)
+                                                                ↓
+                                                    Create Application Record
+                                                                ↓
+                                                    Audit Log Created
+```
+
+#### 2. **Bot Mimic Workflow (Automated)**
+```
+Bot Login → Fetch Technical Applications → Process Each Application
+                                                    ↓
+                                    Update Status (Applied → Screening → Reviewed...)
+                                                    ↓
+                                    Add Timestamped Comments
+                                                    ↓
+                                    Mark as Bot Processed
+                                                    ↓
+                                    Audit Log Created
+```
+
+#### 3. **Admin Workflow (Manual)**
+```
+Admin Login → View All Applications → Review Non-Technical Applications
+                                                    ↓
+                                    Update Status Manually
+                                                    ↓
+                                    Add Comments/Notes
+                                                    ↓
+                                    Audit Log Created
+```
+
+### Database Schema
+
+```javascript
+// User Model
+{
+  name: String,
+  email: String (unique),
+  passwordHash: String,
+  role: Enum ['Applicant', 'Bot Mimic', 'Admin']
+}
+
+// Job Model
+{
+  title, department, location,
+  jobType: Enum ['technical', 'non-technical'],
+  type: Enum ['full-time', 'part-time', 'contract'],
+  description, requirements, responsibilities,
+  salaryMin, salaryMax,
+  status: Enum ['active', 'closed']
+}
+
+// Application Model
+{
+  job: ObjectId (ref: Job),
+  applicant: ObjectId (ref: User),
+  profile: ObjectId (ref: ApplicantProfile),
+  resumeUrl, coverLetter,
+  status: Enum ['submitted', 'under-review', 'shortlisted', 'rejected'],
+  statusHistory: [{
+    status, changedBy, changedByRole,
+    comment, timestamp
+  }]
+}
+
+// AuditLog Model
+{
+  user: ObjectId,
+  userName, userRole,
+  action: Enum [USER_LOGIN, APPLICATION_SUBMITTED, ...],
+  actionDescription,
+  targetType, targetId,
+  metadata,
+  ipAddress,
+  timestamp
+}
+```
+
+---
+
+## 📚 API Documentation
+
+### **Swagger UI** (Interactive Documentation)
+Once the server is running, access the interactive API documentation at:
+```
+http://localhost:3000/api-docs
+```
+
+### **Postman Collection**
+Import the Postman collection for testing:
+- **File**: `Hybrid-ATS-API.postman_collection.json`
+- **Location**: Root directory of the project
+
+#### How to Import:
+1. Open Postman
+2. Click "Import" button
+3. Select `Hybrid-ATS-API.postman_collection.json`
+4. Set the `baseUrl` variable to `http://localhost:3000`
+5. Login using demo credentials to get the auth token
+6. Token is automatically saved for subsequent requests
+
+### **Quick API Reference**
+
+#### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/profile` - Get user profile (protected)
+- `POST /api/auth/logout` - Logout user (protected)
+
+#### Jobs
+- `GET /api/jobs/all` - Get all jobs (public)
+- `GET /api/jobs/:id` - Get job details (public)
+- `POST /api/jobs/create` - Create job (Admin only)
+- `PUT /api/jobs/:id` - Update job (Admin only)
+- `DELETE /api/jobs/:id` - Delete job (Admin only)
+
+#### Applications
+- `POST /api/applications/submit` - Submit application (Applicant only)
+- `GET /api/applications/my` - Get my applications (Applicant only)
+- `GET /api/applications/all` - Get all applications (Admin only)
+- `PUT /api/applications/:id/status` - Update status (Admin/Bot Mimic)
+
+#### Bot Mimic
+- `POST /api/bot-mimic/process` - Process technical applications (Bot Mimic only)
+- `GET /api/bot-mimic/stats` - Get processing statistics
+
+#### Dashboard
+- `GET /api/dashboard/applicant` - Applicant dashboard data
+- `GET /api/dashboard/admin` - Admin dashboard data
+- `GET /api/dashboard/bot-mimic` - Bot Mimic dashboard data
+- `GET /api/dashboard/analytics` - Analytics data (Admin only)
+
+#### Audit Logs
+- `GET /api/audit-logs` - Get audit logs (Admin only)
+- `GET /api/audit-logs/stats` - Get audit statistics (Admin only)
+
+---
+
+## 🎭 Demo Credentials
+
+Use these credentials to test different user roles:
+
+| Role | Email | Password | Access Level |
+|------|-------|----------|-------------|
+| **Admin** | admin@demo.com | Admin@Demo2025!Secure | Full system access, manage all jobs and applications |
+| **Bot Mimic** | bot@demo.com | BotMimic@Demo2025!Auto | Automated processing of technical applications |
+| **Applicant** | applicant@demo.com | Applicant@Demo2025!Job | Submit and track applications |
+
+**Additional Applicant Accounts:**
+- sarah.wilson@demo.com / Sarah@Wilson2025!Dev
+- michael.chen@demo.com / Michael@Chen2025!Ops
+- emily.rodriguez@demo.com / Emily@Rodriguez2025!HR
+- david.kumar@demo.com / David@Kumar2025!Mkt
+
+---
+
+## 🛠️ Technology Stack (Detailed)
 
 ### Backend
 - **Runtime**: Node.js
