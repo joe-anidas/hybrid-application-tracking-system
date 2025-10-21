@@ -145,34 +145,6 @@
  *       403:
  *         description: Forbidden - Bot Mimic access required
  *
- * /api/bot-mimic/auto-process:
- *   post:
- *     summary: Start automatic processing
- *     tags: [Bot Mimic]
- *     description: Start automated continuous processing of technical applications. Bot Mimic access required.
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - intervalMinutes
- *             properties:
- *               intervalMinutes:
- *                 type: integer
- *                 minimum: 1
- *                 description: Processing interval in minutes
- *     responses:
- *       200:
- *         description: Auto-processing started
- *       400:
- *         description: Invalid interval
- *       403:
- *         description: Forbidden - Bot Mimic access required
- *
  * /api/bot-mimic/activity-log:
  *   get:
  *     summary: Get Bot Mimic activity log

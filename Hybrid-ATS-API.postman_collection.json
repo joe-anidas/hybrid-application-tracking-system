@@ -198,6 +198,20 @@
           "response": []
         },
         {
+          "name": "Get Me (Token Payload)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Get user information from JWT token payload (backward compatibility)"
+          },
+          "response": []
+        },
+        {
           "name": "Logout",
           "request": {
             "method": "POST",
@@ -425,11 +439,51 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/applications/my",
+              "raw": "{{baseUrl}}/api/applications/my-applications",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "applications", "my"]
+              "path": ["api", "applications", "my-applications"]
             },
             "description": "Get all applications for current user (Applicant only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw Application",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/:applicationId/withdraw",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", ":applicationId", "withdraw"],
+              "variable": [
+                {
+                  "key": "applicationId",
+                  "value": "PUT_APPLICATION_ID_HERE"
+                }
+              ]
+            },
+            "description": "Withdraw application (Applicant only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Applications by Job",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/applications/job/:jobId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "applications", "job", ":jobId"],
+              "variable": [
+                {
+                  "key": "jobId",
+                  "value": "PUT_JOB_ID_HERE"
+                }
+              ]
+            },
+            "description": "Get all applications for a specific job (Admin only)"
           },
           "response": []
         },
@@ -459,9 +513,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/applications/all?page=1&limit=10",
+              "raw": "{{baseUrl}}/api/applications/admin/all?page=1&limit=10",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "applications", "all"],
+              "path": ["api", "applications", "admin", "all"],
               "query": [
                 {
                   "key": "page",
@@ -488,7 +542,7 @@
           "response": []
         },
         {
-          "name": "Update Application Status",
+          "name": "Update Application Status (Admin)",
           "request": {
             "method": "PUT",
             "header": [
@@ -502,9 +556,9 @@
               "raw": "{\n  \"status\": \"under-review\",\n  \"comment\": \"Application is being reviewed by our team\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/applications/:applicationId/status",
+              "raw": "{{baseUrl}}/api/applications/admin/:applicationId/status",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "applications", ":applicationId", "status"],
+              "path": ["api", "applications", "admin", ":applicationId", "status"],
               "variable": [
                 {
                   "key": "applicationId",
@@ -512,7 +566,7 @@
                 }
               ]
             },
-            "description": "Update application status (Admin/Bot Mimic only)"
+            "description": "Update application status (Admin only)"
           },
           "response": []
         }
@@ -523,23 +577,23 @@
       "name": "Profile",
       "item": [
         {
-          "name": "Get My Profile",
+          "name": "Get/Create/Update Profile",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/profile/my",
+              "raw": "{{baseUrl}}/api/profile",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "profile", "my"]
+              "path": ["api", "profile"]
             },
-            "description": "Get current user's applicant profile"
+            "description": "Get current user's applicant profile (Applicant only)"
           },
           "response": []
         },
         {
-          "name": "Create Profile",
+          "name": "Create or Update Profile",
           "request": {
-            "method": "POST",
+            "method": "PUT",
             "header": [
               {
                 "key": "Content-Type",
@@ -551,34 +605,11 @@
               "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+1234567890\",\n  \"location\": \"New York, NY\",\n  \"summary\": \"Experienced full stack developer with 5 years of experience...\",\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science in Computer Science\",\n      \"institution\": \"MIT\",\n      \"year\": \"2018\",\n      \"field\": \"Computer Science\"\n    }\n  ],\n  \"experience\": [\n    {\n      \"title\": \"Senior Developer\",\n      \"company\": \"Tech Corp\",\n      \"startDate\": \"2020-01\",\n      \"endDate\": \"2025-01\",\n      \"current\": true,\n      \"description\": \"Lead development of web applications...\"\n    }\n  ],\n  \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\"],\n  \"linkedin\": \"https://linkedin.com/in/johndoe\",\n  \"github\": \"https://github.com/johndoe\",\n  \"portfolio\": \"https://johndoe.dev\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/profile/create",
+              "raw": "{{baseUrl}}/api/profile",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "profile", "create"]
+              "path": ["api", "profile"]
             },
-            "description": "Create applicant profile (Applicant only)"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Profile",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"summary\": \"Updated professional summary...\",\n  \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\", \"TypeScript\"]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/profile/update",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "profile", "update"]
-            },
-            "description": "Update applicant profile (Applicant only)"
+            "description": "Create or update applicant profile (Applicant only)"
           },
           "response": []
         }
@@ -589,21 +620,7 @@
       "name": "Bot Mimic",
       "item": [
         {
-          "name": "Process Applications",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/bot-mimic/process",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "bot-mimic", "process"]
-            },
-            "description": "Process technical role applications automatically (Bot Mimic only)"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Processing Stats",
+          "name": "Get Bot Mimic Stats",
           "request": {
             "method": "GET",
             "header": [],
@@ -613,6 +630,135 @@
               "path": ["api", "bot-mimic", "stats"]
             },
             "description": "Get bot mimic processing statistics (Bot Mimic only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Technical Applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/applications?status=all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "applications"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": "Get technical applications to process (Bot Mimic only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Process Single Application",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/process-single/:applicationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "process-single", ":applicationId"],
+              "variable": [
+                {
+                  "key": "applicationId",
+                  "value": "PUT_APPLICATION_ID_HERE"
+                }
+              ]
+            },
+            "description": "Process single technical application (Bot Mimic only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Process Batch Applications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"all\",\n  \"limit\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/process-batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "process-batch"]
+            },
+            "description": "Process multiple applications in batch (Bot Mimic only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Activity Log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/activity-log?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "activity-log"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get bot mimic activity log (Bot Mimic only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Auto-Process Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/auto-process-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "auto-process-status"]
+            },
+            "description": "Get auto-processing status (Bot Mimic only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Enable Auto-Processing",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/auto-process/enable",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "auto-process", "enable"]
+            },
+            "description": "Enable automatic background processing (Bot Mimic only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Disable Auto-Processing",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bot-mimic/auto-process/disable",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bot-mimic", "auto-process", "disable"]
+            },
+            "description": "Disable automatic background processing (Bot Mimic only)"
           },
           "response": []
         }
@@ -663,20 +809,6 @@
             "description": "Get dashboard data for bot mimic"
           },
           "response": []
-        },
-        {
-          "name": "Analytics Dashboard (Admin)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/dashboard/analytics",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "dashboard", "analytics"]
-            },
-            "description": "Get comprehensive analytics data (Admin only)"
-          },
-          "response": []
         }
       ],
       "description": "Dashboard and analytics endpoints"
@@ -690,18 +822,41 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/users/all",
+              "raw": "{{baseUrl}}/api/users",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "all"]
+              "path": ["api", "users"]
             },
             "description": "Get all users (Admin only)"
           },
           "response": []
         },
         {
-          "name": "Get User by ID (Admin)",
+          "name": "Create User (Admin)",
           "request": {
-            "method": "GET",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Admin User\",\n  \"email\": \"newadmin@example.com\",\n  \"password\": \"Admin@123456\",\n  \"role\": \"Admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Create new Admin or Bot Mimic user (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/:userId",
@@ -714,7 +869,7 @@
                 }
               ]
             },
-            "description": "Get specific user details (Admin only)"
+            "description": "Delete user (Admin only)"
           },
           "response": []
         }
