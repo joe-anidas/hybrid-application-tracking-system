@@ -19,7 +19,7 @@ import BotMimicDashboard from './pages/BotMimicDashboard.jsx'
 import ManageUsers from './pages/ManageUsers.jsx'
 import AuditLogs from './pages/AuditLogs.jsx'
 import ApplicationDetailAdmin from './pages/ApplicationDetailAdmin.jsx'
-import reactLogo from './assets/react.svg'
+import reactLogo from './assets/logo.png'
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, loading } = useAuth()

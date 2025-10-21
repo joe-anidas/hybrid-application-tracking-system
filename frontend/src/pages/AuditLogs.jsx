@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { FileText, Calendar, User, Activity, Shield, Bot, UserIcon, LogIn, UserPlus, Trash2, Briefcase, RefreshCw } from 'lucide-react'
-import DashboardLayout from '../components/DashboardLayout'
 import { getAuditLogs, getAuditLogStats } from '../services/auditLogs'
 
 const AuditLogs = () => {
@@ -170,29 +169,44 @@ const AuditLogs = () => {
 
   if (loading && !logs.length) {
     return (
-      <DashboardLayout title="Audit Logs">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <DashboardLayout title="Audit Logs">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-700">Error loading audit logs: {error}</div>
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="text-red-700">Error loading audit logs: {error}</div>
+          </div>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
   return (
-    <DashboardLayout title="Audit Logs">
-      <div className="space-y-6">
-        {/* Stats Cards */}
-        {stats && (
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <Activity className="h-8 w-8 text-indigo-600 mr-3" />
+            Audit Logs
+          </h1>
+          <p className="mt-2 text-gray-600">Complete audit trail of all system activities</p>
+        </div>
+
+        {/* Main Content */}
+        <div className="space-y-6">
+          {/* Stats Cards */}
+          {stats && (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="p-5">
@@ -434,8 +448,9 @@ const AuditLogs = () => {
             </div>
           )}
         </div>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
 

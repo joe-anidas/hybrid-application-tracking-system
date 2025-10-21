@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Download, Eye, Search, ExternalLink, MessageSquare } from 'lucide-react'
-import DashboardLayout from '../components/DashboardLayout'
-import { getAllApplications, updateApplicationStatus, downloadResume } from '../services/applications'
+import { FileText, Search, Eye, MessageSquare, ExternalLink } from 'lucide-react'
+import { getAllApplications, updateApplicationStatus } from '../services/applications'
 
 const STATUS_COLORS = {
   submitted: 'bg-blue-100 text-blue-800 border border-blue-300',
@@ -187,27 +186,42 @@ export default function ReviewApplications() {
 
   if (loading) {
     return (
-      <DashboardLayout title="Review Applications">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <DashboardLayout title="Review Applications">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-700">Error loading applications: {error}</div>
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="text-red-700">Error loading applications: {error}</div>
+          </div>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
   return (
-    <DashboardLayout title="Review Applications">
-      <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <FileText className="h-8 w-8 text-indigo-600 mr-3" />
+            Review Applications
+          </h1>
+          <p className="mt-2 text-gray-600">Review and manage job applications</p>
+        </div>
+
+        {/* Main Content */}
+        <div className="space-y-6">
         {/* Header with Filters */}
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -430,7 +444,8 @@ export default function ReviewApplications() {
             </div>
           </div>
         )}
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }

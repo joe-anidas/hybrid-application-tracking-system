@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { 
   Bot, Activity, Clock, TrendingUp, Zap, Calendar, CheckCircle, 
   Play, Pause, Settings, RefreshCw, AlertCircle, FileText,
-  BarChart3, Users, Briefcase, ArrowRight, Filter
+  BarChart3, Users, Briefcase, ArrowRight, Filter, XCircle, UserCheck
 } from 'lucide-react'
 import {
   getBotMimicStats,
@@ -237,7 +237,7 @@ const BotMimicDashboard = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard
             icon={Briefcase}
             title="Total Applications"
@@ -253,18 +253,25 @@ const BotMimicDashboard = () => {
             color="yellow"
           />
           <StatCard
-            icon={TrendingUp}
-            title="Processed Today"
-            value={stats?.processedToday || 0}
-            subtitle="Status updated"
-            color="green"
-          />
-          <StatCard
             icon={Users}
             title="Shortlisted"
             value={stats?.shortlisted || 0}
             subtitle="Ready for interview"
             color="purple"
+          />
+          <StatCard
+            icon={UserCheck}
+            title="Accepted"
+            value={stats?.accepted || 0}
+            subtitle="Offers extended"
+            color="green"
+          />
+          <StatCard
+            icon={XCircle}
+            title="Rejected"
+            value={stats?.rejected || 0}
+            subtitle="Not selected"
+            color="red"
           />
         </div>
 

@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save, X } from 'lucide-react'
-import DashboardLayout from '../components/DashboardLayout'
+import { ArrowLeft, Save, X, Briefcase } from 'lucide-react'
 import { createJob } from '../services/jobs'
 
 export default function CreateJob() {
@@ -103,10 +102,21 @@ export default function CreateJob() {
   }
 
   return (
-    <DashboardLayout title="Create Job Posting">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <Briefcase className="h-8 w-8 text-indigo-600 mr-3" />
+            Create Job Posting
+          </h1>
+          <p className="mt-2 text-gray-600">Create a new job posting for your organization</p>
+        </div>
+
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto">
+          {/* Action Buttons */}
+          <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <button
               onClick={handleCancel}
@@ -428,7 +438,8 @@ export default function CreateJob() {
             </div>
           </form>
         </div>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
