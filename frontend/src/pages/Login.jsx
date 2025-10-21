@@ -45,9 +45,13 @@ export default function Login() {
   }
 
   const demoUsers = [
-    { role: 'Admin', email: 'admin@demo.com', password: 'admin123' },
-    { role: 'Bot Mimic', email: 'bot@demo.com', password: 'bot123' },
-    { role: 'Applicant', email: 'applicant@demo.com', password: 'applicant123' }
+    { role: 'Admin', name: 'Admin User', email: 'admin@demo.com', password: 'admin123', badge: 'Admin' },
+    { role: 'Bot Mimic', name: 'Bot Mimic User', email: 'bot@demo.com', password: 'bot123', badge: 'Automation' },
+    { role: 'Applicant', name: 'John Doe', email: 'applicant@demo.com', password: 'applicant123', badge: 'Full Stack Dev' },
+    { role: 'Applicant', name: 'Sarah Wilson', email: 'sarah.wilson@demo.com', password: 'applicant123', badge: 'Frontend Dev' },
+    { role: 'Applicant', name: 'Michael Chen', email: 'michael.chen@demo.com', password: 'applicant123', badge: 'DevOps' },
+    { role: 'Applicant', name: 'Emily Rodriguez', email: 'emily.rodriguez@demo.com', password: 'applicant123', badge: 'HR Manager' },
+    { role: 'Applicant', name: 'David Kumar', email: 'david.kumar@demo.com', password: 'applicant123', badge: 'Marketing' }
   ]
 
   const fillDemoCredentials = (demoUser) => {
@@ -59,20 +63,29 @@ export default function Login() {
     <div className="flex flex-col items-center justify-center min-h-dvh px-4">
       <div className="w-full max-w-4xl flex flex-col lg:flex-row gap-8 items-start">
         {/* Demo Credentials Panel */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 w-full lg:w-80">
-          <h3 className="text-lg font-semibold text-blue-900 mb-4">Demo Credentials</h3>
-          <p className="text-sm text-blue-700 mb-4">Click any credential below to auto-fill the login form:</p>
-          <div className="space-y-3">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-6 w-full lg:w-96 shadow-lg">
+          <h3 className="text-lg font-bold text-blue-900 mb-2">Demo Credentials</h3>
+          <p className="text-sm text-blue-700 mb-4">Click to auto-fill login form:</p>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
             {demoUsers.map((user, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => fillDemoCredentials(user)}
-                className="w-full text-left p-3 bg-white border border-blue-200 rounded-md hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                className="w-full text-left p-3 bg-white border-2 border-gray-200 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 transition-all shadow-sm hover:shadow-md group"
               >
-                <div className="font-medium text-gray-900">{user.role}</div>
-                <div className="text-sm text-gray-600">{user.email}</div>
-                <div className="text-xs text-gray-500">Password: {user.password}</div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-gray-900 group-hover:text-blue-900">{user.name}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    user.role === 'Admin' ? 'bg-red-100 text-red-700' :
+                    user.role === 'Bot Mimic' ? 'bg-purple-100 text-purple-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {user.badge}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 truncate">{user.email}</div>
+                <div className="text-xs text-gray-400 mt-1">Password: {user.password}</div>
               </button>
             ))}
           </div>

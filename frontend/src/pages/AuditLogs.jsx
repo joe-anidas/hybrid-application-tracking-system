@@ -45,19 +45,35 @@ const AuditLogs = () => {
         return <LogIn className="h-4 w-4 text-gray-600 transform rotate-180" />
       case 'USER_REGISTER':
       case 'USER_CREATED':
+      case 'USER_UPDATED':
         return <UserPlus className="h-4 w-4 text-green-600" />
       case 'USER_DELETED':
         return <Trash2 className="h-4 w-4 text-red-600" />
+      case 'USER_VIEWED':
+        return <User className="h-4 w-4 text-blue-600" />
       case 'JOB_CREATED':
       case 'JOB_UPDATED':
       case 'JOB_DELETED':
+      case 'JOB_VIEWED':
         return <Briefcase className="h-4 w-4 text-purple-600" />
       case 'APPLICATION_SUBMITTED':
       case 'APPLICATION_STATUS_UPDATED':
+      case 'APPLICATION_UPDATED':
+      case 'APPLICATION_DELETED':
+      case 'APPLICATION_VIEWED':
         return <FileText className="h-4 w-4 text-indigo-600" />
       case 'PROFILE_UPDATED':
       case 'PROFILE_CREATED':
+      case 'PROFILE_VIEWED':
         return <User className="h-4 w-4 text-orange-600" />
+      case 'BOT_PROCESS_SINGLE':
+      case 'BOT_PROCESS_BATCH':
+      case 'BOT_ACTIVITY_VIEWED':
+        return <Bot className="h-4 w-4 text-green-600" />
+      case 'DASHBOARD_VIEWED':
+      case 'DATA_ACCESSED':
+      case 'API_REQUEST':
+        return <Activity className="h-4 w-4 text-gray-600" />
       default:
         return <Activity className="h-4 w-4 text-gray-600" />
     }
@@ -70,19 +86,34 @@ const AuditLogs = () => {
         return 'bg-blue-100 text-blue-800'
       case 'USER_REGISTER':
       case 'USER_CREATED':
+      case 'USER_UPDATED':
+      case 'USER_VIEWED':
         return 'bg-green-100 text-green-800'
       case 'USER_DELETED':
         return 'bg-red-100 text-red-800'
       case 'JOB_CREATED':
       case 'JOB_UPDATED':
       case 'JOB_DELETED':
+      case 'JOB_VIEWED':
         return 'bg-purple-100 text-purple-800'
       case 'APPLICATION_SUBMITTED':
       case 'APPLICATION_STATUS_UPDATED':
+      case 'APPLICATION_UPDATED':
+      case 'APPLICATION_DELETED':
+      case 'APPLICATION_VIEWED':
         return 'bg-indigo-100 text-indigo-800'
       case 'PROFILE_UPDATED':
       case 'PROFILE_CREATED':
+      case 'PROFILE_VIEWED':
         return 'bg-orange-100 text-orange-800'
+      case 'BOT_PROCESS_SINGLE':
+      case 'BOT_PROCESS_BATCH':
+      case 'BOT_ACTIVITY_VIEWED':
+        return 'bg-green-100 text-green-800'
+      case 'DASHBOARD_VIEWED':
+      case 'DATA_ACCESSED':
+      case 'API_REQUEST':
+        return 'bg-gray-100 text-gray-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -115,6 +146,8 @@ const AuditLogs = () => {
         return <Bot className="h-4 w-4 text-green-600" />
       case 'Applicant':
         return <UserIcon className="h-4 w-4 text-blue-600" />
+      case 'System':
+        return <Activity className="h-4 w-4 text-gray-600" />
       default:
         return <UserIcon className="h-4 w-4 text-gray-600" />
     }
@@ -221,17 +254,45 @@ const AuditLogs = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                 >
                   <option value="all">All Actions</option>
-                  <option value="USER_LOGIN">User Login</option>
-                  <option value="USER_REGISTER">User Register</option>
-                  <option value="USER_CREATED">User Created</option>
-                  <option value="USER_DELETED">User Deleted</option>
-                  <option value="JOB_CREATED">Job Created</option>
-                  <option value="JOB_UPDATED">Job Updated</option>
-                  <option value="JOB_DELETED">Job Deleted</option>
-                  <option value="APPLICATION_SUBMITTED">Application Submitted</option>
-                  <option value="APPLICATION_STATUS_UPDATED">Status Changed</option>
-                  <option value="PROFILE_UPDATED">Profile Updated</option>
-                  <option value="PROFILE_CREATED">Profile Created</option>
+                  <optgroup label="Authentication">
+                    <option value="USER_LOGIN">User Login</option>
+                    <option value="USER_LOGOUT">User Logout</option>
+                    <option value="USER_REGISTER">User Register</option>
+                  </optgroup>
+                  <optgroup label="User Management">
+                    <option value="USER_CREATED">User Created</option>
+                    <option value="USER_UPDATED">User Updated</option>
+                    <option value="USER_DELETED">User Deleted</option>
+                    <option value="USER_VIEWED">User Viewed</option>
+                  </optgroup>
+                  <optgroup label="Job Management">
+                    <option value="JOB_CREATED">Job Created</option>
+                    <option value="JOB_UPDATED">Job Updated</option>
+                    <option value="JOB_DELETED">Job Deleted</option>
+                    <option value="JOB_VIEWED">Job Viewed</option>
+                  </optgroup>
+                  <optgroup label="Applications">
+                    <option value="APPLICATION_SUBMITTED">Application Submitted</option>
+                    <option value="APPLICATION_STATUS_UPDATED">Status Updated</option>
+                    <option value="APPLICATION_UPDATED">Application Updated</option>
+                    <option value="APPLICATION_DELETED">Application Deleted</option>
+                    <option value="APPLICATION_VIEWED">Application Viewed</option>
+                  </optgroup>
+                  <optgroup label="Profile Management">
+                    <option value="PROFILE_CREATED">Profile Created</option>
+                    <option value="PROFILE_UPDATED">Profile Updated</option>
+                    <option value="PROFILE_VIEWED">Profile Viewed</option>
+                  </optgroup>
+                  <optgroup label="Bot Mimic">
+                    <option value="BOT_PROCESS_SINGLE">Bot Process Single</option>
+                    <option value="BOT_PROCESS_BATCH">Bot Process Batch</option>
+                    <option value="BOT_ACTIVITY_VIEWED">Bot Activity Viewed</option>
+                  </optgroup>
+                  <optgroup label="System">
+                    <option value="DASHBOARD_VIEWED">Dashboard Viewed</option>
+                    <option value="DATA_ACCESSED">Data Accessed</option>
+                    <option value="API_REQUEST">API Request</option>
+                  </optgroup>
                 </select>
               </div>
 

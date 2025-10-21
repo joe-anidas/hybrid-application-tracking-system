@@ -118,10 +118,12 @@ ${profileData.name || ''}`
       })
     }
     
-    // Auto-fill salary expectation based on job salary range
+    // Auto-fill salary expectation based on job salary range (in LPA)
     let salaryExpectation = ''
     if (job?.salaryRange?.max) {
-      salaryExpectation = `$${job.salaryRange.max}`
+      // Convert from stored value to LPA (divide by 100,000)
+      const maxLPA = (job.salaryRange.max / 100000).toFixed(1)
+      salaryExpectation = maxLPA
     }
     
     setApplication(prev => ({
@@ -156,7 +158,7 @@ Developed and maintained web applications using modern JavaScript frameworks. Pa
 Junior Developer at StartUp Ventures
 Built responsive web interfaces and integrated third-party APIs. Worked in an agile environment, participating in daily standups and sprint planning. Gained hands-on experience with version control, CI/CD pipelines, and cloud deployment.`,
       availableStartDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-      salaryExpectation: job?.salaryRange?.max ? `$${job.salaryRange.max}` : '$80,000 - $100,000'
+      salaryExpectation: job?.salaryRange?.max ? (job.salaryRange.max / 100000).toFixed(1) : '8.0'
     })
     setError('')
   }
@@ -394,15 +396,16 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Salary Expectation (USD/year)
+                  Salary Expectation (₹ LPA - Lakhs Per Annum)
                 </label>
                 <input
                   type="number"
+                  step="0.1"
                   name="salaryExpectation"
                   value={application.salaryExpectation}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="e.g., 80000"
+                  placeholder="e.g., 8.0"
                 />
               </div>
             </div>

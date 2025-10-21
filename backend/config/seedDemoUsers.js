@@ -15,8 +15,32 @@ const demoUsers = [
     role: 'Bot Mimic'
   },
   {
-    name: 'Applicant User',
+    name: 'John Doe',
     email: 'applicant@demo.com',
+    password: 'applicant123',
+    role: 'Applicant'
+  },
+  {
+    name: 'Sarah Wilson',
+    email: 'sarah.wilson@demo.com',
+    password: 'applicant123',
+    role: 'Applicant'
+  },
+  {
+    name: 'Michael Chen',
+    email: 'michael.chen@demo.com',
+    password: 'applicant123',
+    role: 'Applicant'
+  },
+  {
+    name: 'Emily Rodriguez',
+    email: 'emily.rodriguez@demo.com',
+    password: 'applicant123',
+    role: 'Applicant'
+  },
+  {
+    name: 'David Kumar',
+    email: 'david.kumar@demo.com',
     password: 'applicant123',
     role: 'Applicant'
   }
@@ -26,11 +50,14 @@ export const createDemoUsers = async () => {
   try {
     console.log('Creating demo users...')
     
+    const createdUsers = {}
+    
     for (const userData of demoUsers) {
       // Check if user already exists
-      const existingUser = await User.findOne({ email: userData.email })
-      if (existingUser) {
+      let user = await User.findOne({ email: userData.email })
+      if (user) {
         console.log(`Demo user ${userData.email} already exists`)
+        createdUsers[userData.email] = user
         continue
       }
 
@@ -39,18 +66,21 @@ export const createDemoUsers = async () => {
       const passwordHash = await bcrypt.hash(userData.password, salt)
 
       // Create user
-      await User.create({
+      user = await User.create({
         name: userData.name,
         email: userData.email,
         passwordHash,
         role: userData.role
       })
 
+      createdUsers[userData.email] = user
       console.log(`✅ Created demo user: ${userData.email} (${userData.role})`)
     }
     
     console.log('Demo users creation completed!')
+    return createdUsers
   } catch (error) {
     console.error('Error creating demo users:', error)
+    throw error
   }
 }
