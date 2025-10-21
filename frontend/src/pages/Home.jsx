@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section id="home" className="mx-auto max-w-6xl px-4 py-16 sm:py-24 grow">
+      <section id="home" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 grow">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div>
             <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900">

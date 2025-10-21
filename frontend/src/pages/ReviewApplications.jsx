@@ -3,13 +3,63 @@ import { useNavigate } from 'react-router-dom'
 import { FileText, Search, Eye, MessageSquare, ExternalLink } from 'lucide-react'
 import { getAllApplications, updateApplicationStatus } from '../services/applications'
 
+// Comment Tooltip Component
+const CommentTooltip = ({ comment, onClick }) => {
+  const [showTooltip, setShowTooltip] = useState(false)
+  
+  if (!comment) {
+    return (
+      <button
+        onClick={onClick}
+        className="inline-flex items-center text-gray-400 hover:text-indigo-600 transition-colors"
+      >
+        <MessageSquare className="h-4 w-4 mr-1" />
+        <span className="text-xs">Add</span>
+      </button>
+    )
+  }
+
+  // Truncate to first 2 words
+  const words = comment.trim().split(/\s+/)
+  const truncated = words.slice(0, 2).join(' ')
+  const shouldTruncate = words.length > 2
+
+  return (
+    <div className="relative inline-block">
+      <button
+        onClick={onClick}
+        className="flex items-center gap-0.5 text-gray-600 hover:text-indigo-600 transition-colors"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <MessageSquare className="h-3 w-3 flex-shrink-0" />
+        <span className="text-xs">
+          {truncated}{shouldTruncate && '...'}
+        </span>
+      </button>
+      
+      {/* Tooltip Popup */}
+      {showTooltip && (
+        <div className="absolute z-50 left-0 top-full mt-2 w-72 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-3 animate-fadeIn pointer-events-none">
+          <div className="font-semibold mb-1 text-gray-200">Feedback:</div>
+          <div className="text-gray-100 leading-relaxed whitespace-pre-wrap break-words">
+            {comment}
+          </div>
+          {/* Arrow */}
+          <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const STATUS_COLORS = {
   submitted: 'bg-blue-100 text-blue-800 border border-blue-300',
   'under-review': 'bg-yellow-100 text-yellow-800 border border-yellow-300',
-  shortlisted: 'bg-green-100 text-green-800 border border-green-300',
+  shortlisted: 'bg-purple-100 text-purple-800 border border-purple-300',
   rejected: 'bg-red-100 text-red-800 border border-red-300',
   withdrawn: 'bg-gray-100 text-gray-800 border border-gray-300',
-  accepted: 'bg-purple-100 text-purple-800 border border-purple-300'
+  accepted: 'bg-green-100 text-green-800 border border-green-300'
 }
 
 const STATUS_OPTIONS = [
@@ -28,7 +78,7 @@ export default function ReviewApplications() {
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
-  const [jobTypeFilter, setJobTypeFilter] = useState('all')
+  const [jobTypeFilter, setJobTypeFilter] = useState('non-technical')
   const [updatingStatus, setUpdatingStatus] = useState(null)
   const [commentModal, setCommentModal] = useState({ show: false, applicationId: null, currentComment: '' })
   const [savingComment, setSavingComment] = useState(false)
@@ -102,7 +152,7 @@ export default function ReviewApplications() {
 
     // Filter by job type
     if (jobTypeFilter !== 'all') {
-      filtered = filtered.filter(app => app.job?.type === jobTypeFilter)
+      filtered = filtered.filter(app => app.job?.jobType === jobTypeFilter)
     }
 
     // Filter by search term
@@ -186,8 +236,8 @@ export default function ReviewApplications() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
@@ -198,8 +248,8 @@ export default function ReviewApplications() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="text-red-700">Error loading applications: {error}</div>
           </div>
@@ -209,8 +259,8 @@ export default function ReviewApplications() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
@@ -246,8 +296,8 @@ export default function ReviewApplications() {
                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 w-40"
                 >
                   <option value="all">All Types</option>
-                  <option value="Technical">Technical</option>
-                  <option value="Non-Technical">Non-Technical</option>
+                  <option value="technical">Technical</option>
+                  <option value="non-technical">Non-Technical</option>
                 </select>
               </div>
               <div className="flex items-center gap-2">
@@ -303,7 +353,7 @@ export default function ReviewApplications() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                       Comments
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -347,7 +397,7 @@ export default function ReviewApplications() {
                         <div className="text-sm text-gray-900">{application.job?.department || 'N/A'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{application.job?.type || 'N/A'}</div>
+                        <div className="text-sm text-gray-900 capitalize">{application.job?.jobType || 'N/A'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{formatDate(getSubmissionDate(application))}</div>
@@ -366,19 +416,11 @@ export default function ReviewApplications() {
                           ))}
                         </select>
                       </td>
-                      <td className="px-6 py-4">
-                        <button
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <CommentTooltip 
+                          comment={application.notes}
                           onClick={() => handleOpenCommentModal(application)}
-                          className="inline-flex items-center text-gray-600 hover:text-indigo-600 transition-colors"
-                          title={application.notes || 'Add comment'}
-                        >
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          {application.notes ? (
-                            <span className="text-xs text-gray-500 max-w-xs truncate">{application.notes}</span>
-                          ) : (
-                            <span className="text-xs text-gray-400">Add</span>
-                          )}
-                        </button>
+                        />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button

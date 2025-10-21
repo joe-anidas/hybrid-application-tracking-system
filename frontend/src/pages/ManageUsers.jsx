@@ -126,8 +126,8 @@ const ManageUsers = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
@@ -138,8 +138,8 @@ const ManageUsers = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="text-red-700">Error loading users: {error}</div>
           </div>
@@ -149,8 +149,8 @@ const ManageUsers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
@@ -161,7 +161,7 @@ const ManageUsers = () => {
         </div>
         {/* Success Message */}
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 rounded-md p-4 flex items-center justify-between">
+          <div className="bg-green-50 border border-green-200 rounded-md p-4 flex items-center justify-between mb-6">
             <div className="text-green-700">{successMessage}</div>
             <button onClick={() => setSuccessMessage(null)} className="text-green-700 hover:text-green-900">
               <X className="h-4 w-4" />
@@ -170,7 +170,7 @@ const ManageUsers = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
@@ -237,7 +237,7 @@ const ManageUsers = () => {
         </div>
 
         {/* Actions Bar */}
-        <div className="bg-white shadow rounded-lg p-6">
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex-1 flex gap-4">
               {/* Search */}

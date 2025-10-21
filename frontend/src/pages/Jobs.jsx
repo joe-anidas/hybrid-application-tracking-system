@@ -27,7 +27,8 @@ export default function Jobs() {
     try {
       setLoading(true)
       setError('')
-      const response = await getAllJobs(filters)
+      // Pass a high limit to get all jobs instead of default pagination
+      const response = await getAllJobs({ ...filters, limit: 1000 })
       
       if (response.success) {
         setJobs(response.jobs)

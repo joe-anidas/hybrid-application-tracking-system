@@ -32,7 +32,7 @@ const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-white font-semibold text-lg mb-3">Hybrid ATS</h3>
             <p className="text-sm text-slate-400 mb-4">
-              Modern application tracking system designed to streamline your hiring process and manage applications efficiently.
+              Modern application tracking system designed to streamline your hiring <br/>process and manage applications efficiently.
             </p>
             <div className="flex gap-4">
               <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
