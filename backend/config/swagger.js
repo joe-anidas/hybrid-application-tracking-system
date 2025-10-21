@@ -38,11 +38,11 @@ and manual (non-technical roles) application workflows with complete audit trail
     },
     servers: [
       {
-        url: 'https://hybrid-application-tracking-system-lydq.onrender.com',
+        url: 'http://localhost:3000',
         description: 'Development server'
       },
       {
-        url: 'https://your-api-domain.vercel.app',
+        url: 'https://hybrid-application-tracking-system-lydq.onrender.com',
         description: 'Production server'
       }
     ],
