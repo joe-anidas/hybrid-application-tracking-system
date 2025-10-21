@@ -422,7 +422,7 @@ Admin Login → View All Applications → Review Non-Technical Applications
 ### **Swagger UI** (Interactive Documentation)
 Once the server is running, access the interactive API documentation at:
 ```
-http://localhost:3000/api-docs
+https://hybrid-application-tracking-system-lydq.onrender.com/api-docs
 ```
 
 ### **Postman Collection**
@@ -434,7 +434,7 @@ Import the Postman collection for testing:
 1. Open Postman
 2. Click "Import" button
 3. Select `Hybrid-ATS-API.postman_collection.json`
-4. Set the `baseUrl` variable to `http://localhost:3000`
+4. Set the `baseUrl` variable to `https://hybrid-application-tracking-system-lydq.onrender.com`
 5. Login using demo credentials to get the auth token
 6. Token is automatically saved for subsequent requests
 
@@ -621,7 +621,7 @@ npm install
 # JWT_EXPIRES_IN=7d
 # PORT=3000
 # NODE_ENV=development
-# CORS_ORIGIN=http://localhost:5173
+# CORS_ORIGIN=https://hybrid-application-tracking-system-gold.vercel.app
 
 # Start the backend server
 npm run dev
@@ -633,7 +633,7 @@ cd frontend
 npm install
 
 # Create .env file with:
-# VITE_API_BASE=http://localhost:3000/api
+# VITE_API_BASE=https://hybrid-application-tracking-system-lydq.onrender.com/api
 
 # Start the frontend development server
 npm run dev
@@ -653,7 +653,7 @@ This creates:
 
 ### Access the Application
 
-**Frontend URL**: http://localhost:5173
+**Frontend URL**: https://hybrid-application-tracking-system-gold.vercel.app
 
 **Demo Login Credentials**:
 | Role | Email | Password |
@@ -811,12 +811,12 @@ JWT_SECRET=your_super_secure_secret_key
 JWT_EXPIRES_IN=7d
 PORT=3000
 NODE_ENV=development
-CORS_ORIGIN=http://localhost:5173
+CORS_ORIGIN=https://hybrid-application-tracking-system-gold.vercel.app
 ```
 
 ### Frontend (.env)
 ```env
-VITE_API_BASE=http://localhost:3000/api
+VITE_API_BASE=https://hybrid-application-tracking-system-lydq.onrender.com/api
 ```
 
 ## 🤝 Contributing

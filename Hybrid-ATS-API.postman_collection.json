@@ -2,7 +2,7 @@
   "info": {
     "name": "Hybrid Application Tracking System API",
     "_postman_id": "ats-api-collection",
-    "description": "Complete API collection for the Hybrid Application Tracking System - A MERN stack application for managing job applications with automated (Bot Mimic) and manual (Admin) workflows.\n\n## Demo Credentials\n\n| Role | Email | Password |\n|------|-------|----------|\n| Admin | admin@demo.com | Admin@Demo2025!Secure |\n| Bot Mimic | bot@demo.com | BotMimic@Demo2025!Auto |\n| Applicant | applicant@demo.com | Applicant@Demo2025!Job |\n\n## Setup Instructions\n\n1. Import this collection into Postman\n2. Set the `baseUrl` variable in the environment (default: http://localhost:3000)\n3. Login using one of the demo credentials\n4. The token will be automatically saved for subsequent requests\n5. Test the API endpoints\n\n## Workflow\n\n1. **Authentication** - Register/Login to get JWT token\n2. **Profile** - Create applicant profile (required before applying)\n3. **Jobs** - Browse and search available jobs\n4. **Applications** - Submit applications to jobs\n5. **Bot Mimic** - Automated processing for technical roles\n6. **Admin** - Manual processing for non-technical roles\n7. **Dashboard** - View analytics and statistics\n8. **Audit Logs** - Track all system activities",
+    "description": "Complete API collection for the Hybrid Application Tracking System - A MERN stack application for managing job applications with automated (Bot Mimic) and manual (Admin) workflows.\n\n## Demo Credentials\n\n| Role | Email | Password |\n|------|-------|----------|\n| Admin | admin@demo.com | Admin@Demo2025!Secure |\n| Bot Mimic | bot@demo.com | BotMimic@Demo2025!Auto |\n| Applicant | applicant@demo.com | Applicant@Demo2025!Job |\n\n## Setup Instructions\n\n1. Import this collection into Postman\n2. Set the `baseUrl` variable in the environment (default: https://hybrid-application-tracking-system-lydq.onrender.com)\n3. Login using one of the demo credentials\n4. The token will be automatically saved for subsequent requests\n5. Test the API endpoints\n\n## Workflow\n\n1. **Authentication** - Register/Login to get JWT token\n2. **Profile** - Create applicant profile (required before applying)\n3. **Jobs** - Browse and search available jobs\n4. **Applications** - Submit applications to jobs\n5. **Bot Mimic** - Automated processing for technical roles\n6. **Admin** - Manual processing for non-technical roles\n7. **Dashboard** - View analytics and statistics\n8. **Audit Logs** - Track all system activities",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -18,7 +18,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000",
+      "value": "https://hybrid-application-tracking-system-lydq.onrender.com",
       "type": "string"
     },
     {

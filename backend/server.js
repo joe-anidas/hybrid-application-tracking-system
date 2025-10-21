@@ -23,7 +23,7 @@ const __dirname = path.dirname(__filename)
 const app = express();
 
 // CORS configuration
-const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+const allowedOrigins = (process.env.CORS_ORIGIN || "https://hybrid-application-tracking-system-gold.vercel.app")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
