@@ -99,6 +99,9 @@ app.get('/uploads/resumes/:filename', (req, res) => {
 // Serve other static files (if needed)
 app.use('/uploads', express.static('uploads'))
 
+// Import auto-process service
+import { startAutoProcess } from './services/autoProcessService.js'
+
 // ✅ Start server
 const PORT = process.env.PORT || 3000;
 
@@ -107,4 +110,12 @@ app.get("/", (_req, res) => {
   res.json({ status: "ok", service: "ats-backend" });
 });
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`)
+  
+  // Start auto-processing service after MongoDB connects
+  setTimeout(() => {
+    console.log('🤖 Initializing Bot Mimic auto-processing service...')
+    startAutoProcess()
+  }, 2000) // Wait 2 seconds for MongoDB to be ready
+});

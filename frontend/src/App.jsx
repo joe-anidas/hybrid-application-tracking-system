@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useNavigate } from 'react-router-dom'
+import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Footer from './components/Footer.jsx'
@@ -40,14 +40,8 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600">You don't have permission to access this page.</p>
-        </div>
-      </div>
-    )
+    // Redirect to home page if user doesn't have permission
+    return <Navigate to="/" replace />
   }
 
   return children
@@ -367,6 +361,8 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
+        {/* Catch-all route for 404 - redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 

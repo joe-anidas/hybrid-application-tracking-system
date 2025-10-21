@@ -398,16 +398,14 @@ function extractTargetInfo(req, responseBody) {
   }
 
   // Try to get name from response body
-  if (responseBody) {
-    if (typeof responseBody === 'object') {
-      targetName = responseBody.job?.title || 
-                   responseBody.application?.job?.title ||
-                   responseBody.user?.name ||
-                   responseBody.profile?.fullName ||
-                   responseBody.name ||
-                   responseBody.title ||
-                   null
-    }
+  if (responseBody && typeof responseBody === 'object') {
+    targetName = responseBody.job?.title || 
+                 responseBody.application?.job?.title ||
+                 responseBody.user?.name ||
+                 responseBody.profile?.fullName ||
+                 responseBody.name ||
+                 responseBody.title ||
+                 null
   }
 
   // Try to get name from request body

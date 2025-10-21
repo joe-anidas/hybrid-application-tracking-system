@@ -53,3 +53,31 @@ export const getBotMimicActivityLog = async (page = 1, limit = 50) => {
   })
   return response.data
 }
+
+// Get auto-process status
+export const getAutoProcessStatus = async () => {
+  const response = await axios.get(`${API_URL}/bot-mimic/auto-process-status`, {
+    headers: getAuthHeader()
+  })
+  return response.data
+}
+
+// Enable auto-processing
+export const enableAutoProcess = async () => {
+  const response = await axios.post(
+    `${API_URL}/bot-mimic/auto-process/enable`,
+    {},
+    { headers: getAuthHeader() }
+  )
+  return response.data
+}
+
+// Disable auto-processing
+export const disableAutoProcess = async () => {
+  const response = await axios.post(
+    `${API_URL}/bot-mimic/auto-process/disable`,
+    {},
+    { headers: getAuthHeader() }
+  )
+  return response.data
+}

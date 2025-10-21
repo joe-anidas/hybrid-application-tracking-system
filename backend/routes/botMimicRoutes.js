@@ -3,6 +3,7 @@ import Application from '../models/Application.js'
 import Job from '../models/Job.js'
 import { createAuditLog } from '../utils/auditLogger.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
+import { getAutoProcessStatus, enableAutoProcess, disableAutoProcess } from '../services/autoProcessService.js'
 
 const router = express.Router()
 const requireBotMimic = requireRole('Bot Mimic')
@@ -250,11 +251,11 @@ router.post('/process-single/:id', async (req, res) => {
 
     // Create audit log
     await createAuditLog({
-      user: req.user.id,
+      userId: req.user.id,
       userName: req.user.name,
       userRole: req.user.role,
-      action: 'APPLICATION_STATUS_UPDATED',
-      actionDescription: `Bot Mimic: Updated application status from ${previousStatus} to ${nextStatus}`,
+      action: 'BOT_PROCESS_SINGLE',
+      actionDescription: `${req.user.name} (Bot Mimic) processed application: ${application.applicant.name} - ${application.job.title}, status changed from ${previousStatus} to ${nextStatus}`,
       targetType: 'Application',
       targetId: application._id,
       targetName: `${application.applicant.name} - ${application.job.title}`,
@@ -262,10 +263,11 @@ router.post('/process-single/:id', async (req, res) => {
       metadata: {
         previousStatus,
         newStatus: nextStatus,
-        comment: application.notes,
+        comment: botComment,
         jobTitle: application.job.title,
         applicantName: application.applicant.name,
-        botMimic: true
+        botMimicUser: req.user.name,
+        processType: 'single'
       }
     })
 
@@ -350,13 +352,13 @@ router.post('/process-batch', async (req, res) => {
         
         await application.save()
 
-        // Create audit log
+        // Create individual audit log for each application in batch
         await createAuditLog({
-          user: req.user.id,
+          userId: req.user.id,
           userName: req.user.name,
           userRole: req.user.role,
-          action: 'APPLICATION_STATUS_UPDATED',
-          actionDescription: `Bot Mimic: Batch update from ${previousStatus} to ${nextStatus}`,
+          action: 'BOT_PROCESS_BATCH',
+          actionDescription: `${req.user.name} (Bot Mimic) batch processed: ${application.applicant.name} - ${application.job.title}, status changed from ${previousStatus} to ${nextStatus}`,
           targetType: 'Application',
           targetId: application._id,
           targetName: `${application.applicant.name} - ${application.job.title}`,
@@ -364,9 +366,11 @@ router.post('/process-batch', async (req, res) => {
           metadata: {
             previousStatus,
             newStatus: nextStatus,
-            comment: application.notes,
-            batchProcess: true,
-            botMimic: true
+            comment: botComment,
+            jobTitle: application.job.title,
+            applicantName: application.applicant.name,
+            botMimicUser: req.user.name,
+            processType: 'batch'
           }
         })
 
@@ -407,6 +411,57 @@ router.post('/process-batch', async (req, res) => {
   }
 })
 
+// POST /api/bot-mimic/auto-process - Enable/disable auto-processing
+router.post('/auto-process', async (req, res) => {
+  try {
+    const { enabled } = req.body
+
+    if (enabled) {
+      // Log auto-process start
+      await createAuditLog({
+        user: req.user.id,
+        userName: req.user.name,
+        userRole: req.user.role,
+        action: 'BOT_AUTO_PROCESS',
+        actionDescription: `${req.user.name} (Bot Mimic) enabled auto-processing`,
+        targetType: 'System',
+        ipAddress: req.ip,
+        metadata: { enabled: true }
+      })
+
+      res.json({
+        success: true,
+        message: 'Auto-processing enabled',
+        enabled: true
+      })
+    } else {
+      // Log auto-process stop
+      await createAuditLog({
+        user: req.user.id,
+        userName: req.user.name,
+        userRole: req.user.role,
+        action: 'BOT_AUTO_PROCESS',
+        actionDescription: `${req.user.name} (Bot Mimic) disabled auto-processing`,
+        targetType: 'System',
+        ipAddress: req.ip,
+        metadata: { enabled: false }
+      })
+
+      res.json({
+        success: true,
+        message: 'Auto-processing disabled',
+        enabled: false
+      })
+    }
+  } catch (error) {
+    console.error('Error toggling auto-process:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to toggle auto-processing'
+    })
+  }
+})
+
 // GET /api/bot-mimic/activity-log - Get bot mimic activity logs
 router.get('/activity-log', async (req, res) => {
   try {
@@ -414,9 +469,17 @@ router.get('/activity-log', async (req, res) => {
 
     const { default: AuditLog } = await import('../models/AuditLog.js')
     
+    // Get all bot mimic related actions
     const logs = await AuditLog.find({
       userRole: 'Bot Mimic',
-      action: 'APPLICATION_STATUS_UPDATED'
+      action: {
+        $in: [
+          'APPLICATION_STATUS_UPDATED',
+          'BOT_PROCESS_SINGLE',
+          'BOT_PROCESS_BATCH',
+          'BOT_AUTO_PROCESS'
+        ]
+      }
     })
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
@@ -424,7 +487,14 @@ router.get('/activity-log', async (req, res) => {
 
     const total = await AuditLog.countDocuments({
       userRole: 'Bot Mimic',
-      action: 'APPLICATION_STATUS_UPDATED'
+      action: {
+        $in: [
+          'APPLICATION_STATUS_UPDATED',
+          'BOT_PROCESS_SINGLE',
+          'BOT_PROCESS_BATCH',
+          'BOT_AUTO_PROCESS'
+        ]
+      }
     })
 
     res.json({
@@ -442,6 +512,97 @@ router.get('/activity-log', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch activity log'
+    })
+  }
+})
+
+// GET /api/bot-mimic/auto-process-status - Get current auto-process state
+router.get('/auto-process-status', async (req, res) => {
+  try {
+    const status = await getAutoProcessStatus()
+    res.json({
+      success: true,
+      ...status
+    })
+  } catch (error) {
+    console.error('Error getting auto-process status:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get auto-process status'
+    })
+  }
+})
+
+// POST /api/bot-mimic/auto-process/enable - Enable auto-processing
+router.post('/auto-process/enable', async (req, res) => {
+  try {
+    const { userId, userName, userRole } = req.user
+
+    await enableAutoProcess({ userId, userName, userRole })
+
+    // Create audit log
+    await createAuditLog({
+      userId,
+      userName,
+      userRole,
+      action: 'BOT_AUTO_PROCESS',
+      actionDescription: `${userName} (${userRole}) enabled auto-processing`,
+      targetType: 'System',
+      targetName: 'Auto-Processing Service',
+      ipAddress: req.ip || req.connection.remoteAddress,
+      metadata: {
+        action: 'enabled',
+        botMimic: true
+      }
+    })
+
+    res.json({
+      success: true,
+      message: 'Auto-processing enabled',
+      enabled: true
+    })
+  } catch (error) {
+    console.error('Error enabling auto-process:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to enable auto-processing'
+    })
+  }
+})
+
+// POST /api/bot-mimic/auto-process/disable - Disable auto-processing
+router.post('/auto-process/disable', async (req, res) => {
+  try {
+    const { userId, userName, userRole } = req.user
+
+    await disableAutoProcess({ userId, userName, userRole })
+
+    // Create audit log
+    await createAuditLog({
+      userId,
+      userName,
+      userRole,
+      action: 'BOT_AUTO_PROCESS',
+      actionDescription: `${userName} (${userRole}) paused auto-processing`,
+      targetType: 'System',
+      targetName: 'Auto-Processing Service',
+      ipAddress: req.ip || req.connection.remoteAddress,
+      metadata: {
+        action: 'paused',
+        botMimic: true
+      }
+    })
+
+    res.json({
+      success: true,
+      message: 'Auto-processing paused',
+      enabled: false
+    })
+  } catch (error) {
+    console.error('Error disabling auto-process:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to pause auto-processing'
     })
   }
 })

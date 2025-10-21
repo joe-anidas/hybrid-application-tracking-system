@@ -9,7 +9,10 @@ import {
   getTechnicalApplications,
   processSingleApplication,
   processBatchApplications,
-  getBotMimicActivityLog
+  getBotMimicActivityLog,
+  getAutoProcessStatus,
+  enableAutoProcess,
+  disableAutoProcess
 } from '../services/botMimic'
 
 const StatCard = ({ icon: Icon, title, value, subtitle, color = 'indigo' }) => (
@@ -50,25 +53,26 @@ const BotMimicDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [batchLimit, setBatchLimit] = useState(10)
   const [autoProcessEnabled, setAutoProcessEnabled] = useState(false)
-  const [autoProcessInterval, setAutoProcessInterval] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
   const [activeTab, setActiveTab] = useState('applications')
 
-  // Fetch all data
+  // Fetch all data including auto-process status
   const fetchData = async () => {
     try {
       setLoading(true)
       setError(null)
       
-      const [statsData, appsData, logData] = await Promise.all([
+      const [statsData, appsData, logData, autoProcessData] = await Promise.all([
         getBotMimicStats(),
         getTechnicalApplications(statusFilter),
-        getBotMimicActivityLog(1, 50)
+        getBotMimicActivityLog(1, 50),
+        getAutoProcessStatus()
       ])
 
       setStats(statsData.stats)
       setApplications(appsData.applications)
       setActivityLog(logData.logs)
+      setAutoProcessEnabled(autoProcessData.enabled)
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch data')
     } finally {
@@ -116,41 +120,40 @@ const BotMimicDashboard = () => {
     }
   }
 
-  // Auto-process toggle
-  const toggleAutoProcess = () => {
-    if (autoProcessEnabled) {
-      if (autoProcessInterval) {
-        clearInterval(autoProcessInterval)
-        setAutoProcessInterval(null)
+  // Auto-process toggle (persists across logout/login)
+  const toggleAutoProcess = async () => {
+    try {
+      if (autoProcessEnabled) {
+        // Pause auto-processing
+        await disableAutoProcess()
+        setAutoProcessEnabled(false)
+        setSuccessMessage('Auto-processing paused')
+        setTimeout(() => setSuccessMessage(null), 3000)
+      } else {
+        // Enable auto-processing
+        await enableAutoProcess()
+        setAutoProcessEnabled(true)
+        setSuccessMessage('Auto-processing enabled (30 second intervals)')
+        setTimeout(() => setSuccessMessage(null), 3000)
       }
-      setAutoProcessEnabled(false)
-      setSuccessMessage('Auto-processing stopped')
-      setTimeout(() => setSuccessMessage(null), 3000)
-    } else {
-      setAutoProcessEnabled(true)
-      setSuccessMessage('Auto-processing started (30 second intervals)')
-      setTimeout(() => setSuccessMessage(null), 3000)
-      
-      const interval = setInterval(async () => {
-        try {
-          await processBatchApplications('all', 5)
-          await fetchData()
-        } catch (err) {
-          console.error('Auto-process error:', err)
-        }
-      }, 30000)
-      
-      setAutoProcessInterval(interval)
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to toggle auto-process')
     }
   }
 
+  // Refresh activity log periodically (every 10 seconds)
   useEffect(() => {
-    return () => {
-      if (autoProcessInterval) {
-        clearInterval(autoProcessInterval)
+    const refreshInterval = setInterval(async () => {
+      try {
+        const logData = await getBotMimicActivityLog(1, 50)
+        setActivityLog(logData.logs)
+      } catch (err) {
+        console.error('Failed to refresh activity log:', err)
       }
-    }
-  }, [autoProcessInterval])
+    }, 10000)
+
+    return () => clearInterval(refreshInterval)
+  }, [])
 
   if (loading && !stats) {
     return (
@@ -319,7 +322,7 @@ const BotMimicDashboard = () => {
                 handleProcessSingle={handleProcessSingle}
               />
             ) : (
-              <ActivityLogTab activityLog={activityLog} />
+              <ActivityLogTab activityLog={activityLog} onRefresh={fetchData} />
             )}
           </div>
         </div>
@@ -461,8 +464,18 @@ const ApplicationsTab = ({
 )
 
 // Activity Log Tab Component
-const ActivityLogTab = ({ activityLog }) => (
+const ActivityLogTab = ({ activityLog, onRefresh }) => (
   <div className="space-y-4">
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+      <button
+        onClick={onRefresh}
+        className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      >
+        <RefreshCw className="h-4 w-4 mr-2" />
+        Refresh
+      </button>
+    </div>
     <div className="flow-root">
       <ul className="-mb-8">
         {activityLog.length === 0 ? (

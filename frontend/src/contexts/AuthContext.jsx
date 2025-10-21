@@ -36,6 +36,13 @@ export const AuthProvider = ({ children }) => {
       setError(err.message)
       localStorage.removeItem('token')
       setUser(null)
+      // Redirect to home page if auth check fails
+      if (window.location.pathname !== '/' && 
+          window.location.pathname !== '/login' && 
+          window.location.pathname !== '/register' &&
+          !window.location.pathname.startsWith('/jobs')) {
+        window.location.href = '/'
+      }
     } finally {
       setLoading(false)
     }
