@@ -11,11 +11,22 @@ const requireBotMimic = requireRole('Bot Mimic')
 router.use(requireAuth)
 router.use(requireBotMimic)
 
-// Status progression workflow
+// Status progression workflow with probabilities
+// Bot can progress through multiple paths:
+// Path 1: submitted -> under-review -> rejected (20% chance from under-review)
+// Path 2: submitted -> under-review -> shortlisted -> rejected (15% chance from shortlisted)
+// Path 3: submitted -> under-review -> shortlisted -> accepted (main path)
+
 const STATUS_WORKFLOW = {
-  'submitted': 'under-review',
-  'under-review': 'shortlisted',
-  'shortlisted': 'accepted'
+  'submitted': ['under-review'],
+  'under-review': ['shortlisted', 'rejected'], // 80% shortlisted, 20% rejected
+  'shortlisted': ['accepted', 'rejected'] // 85% accepted, 15% rejected
+}
+
+// Rejection probability for each status
+const REJECTION_PROBABILITY = {
+  'under-review': 0.20, // 20% chance of rejection
+  'shortlisted': 0.15   // 15% chance of rejection
 }
 
 // Bot-generated comments for each status transition
@@ -37,6 +48,16 @@ const BOT_COMMENTS = {
     'Strong performance in all evaluation stages. Application accepted.',
     'Technical proficiency confirmed. Moving forward with offer.',
     'All criteria met successfully. Proceeding with acceptance.'
+  ],
+  'rejected': [
+    'Technical skills do not meet current requirements. Application rejected.',
+    'After careful review, position has been filled with another candidate.',
+    'Experience level does not align with job requirements at this time.',
+    'Unfortunately, we are moving forward with other candidates.',
+    'Profile does not match the specific technical requirements for this role.',
+    'Current skill set does not meet the minimum criteria. Application declined.',
+    'Thank you for your interest. We have selected candidates with closer skill match.',
+    'After thorough evaluation, we have decided to pursue other applicants.'
   ]
 }
 
@@ -44,6 +65,32 @@ const BOT_COMMENTS = {
 const getRandomComment = (status) => {
   const comments = BOT_COMMENTS[status] || []
   return comments[Math.floor(Math.random() * comments.length)]
+}
+
+// Helper function to determine next status based on probability
+const getNextStatus = (currentStatus) => {
+  const possibleStatuses = STATUS_WORKFLOW[currentStatus]
+  
+  if (!possibleStatuses || possibleStatuses.length === 0) {
+    return null
+  }
+  
+  // If only one possible status, return it
+  if (possibleStatuses.length === 1) {
+    return possibleStatuses[0]
+  }
+  
+  // Check if we should reject based on probability
+  const rejectionChance = REJECTION_PROBABILITY[currentStatus] || 0
+  const random = Math.random()
+  
+  if (random < rejectionChance) {
+    // Find rejected in possible statuses
+    return possibleStatuses.find(status => status === 'rejected') || possibleStatuses[0]
+  }
+  
+  // Return the non-rejected status (progression path)
+  return possibleStatuses.find(status => status !== 'rejected') || possibleStatuses[0]
 }
 
 // Helper function to add delay (simulate human-like behavior)
@@ -84,6 +131,11 @@ router.get('/stats', async (req, res) => {
       status: 'accepted'
     })
 
+    const rejected = await Application.countDocuments({
+      job: { $in: technicalJobIds },
+      status: 'rejected'
+    })
+
     // Get status breakdown
     const statusBreakdown = await Application.aggregate([
       { $match: { job: { $in: technicalJobIds } } },
@@ -98,6 +150,7 @@ router.get('/stats', async (req, res) => {
         processedToday,
         shortlisted,
         accepted,
+        rejected,
         statusBreakdown
       }
     })
@@ -167,7 +220,7 @@ router.post('/process-single/:id', async (req, res) => {
     }
 
     // Check if can be progressed
-    const nextStatus = STATUS_WORKFLOW[application.status]
+    const nextStatus = getNextStatus(application.status)
     if (!nextStatus) {
       return res.status(400).json({
         success: false,
@@ -254,7 +307,7 @@ router.post('/process-batch', async (req, res) => {
 
     for (const application of applications) {
       try {
-        const nextStatus = STATUS_WORKFLOW[application.status]
+        const nextStatus = getNextStatus(application.status)
         
         if (!nextStatus) {
           results.skipped++

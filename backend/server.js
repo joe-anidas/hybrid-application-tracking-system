@@ -13,7 +13,6 @@ import applicationRoutes from './routes/applicationRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import auditLogRoutes from './routes/auditLogRoutes.js'
 import botMimicRoutes from './routes/botMimicRoutes.js'
-import { seedAllDemoData } from './config/seedDemoData.js'
 import auditMiddleware from './middleware/auditMiddleware.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -51,11 +50,8 @@ app.use(auditMiddleware)
 // ✅ MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI || "mongodb://localhost:27017/hybrid-ats")
-  .then(async () => {
+  .then(() => {
     console.log("✅ MongoDB connected")
-    // Seed all demo data (users, jobs, profiles, applications)
-    // Only runs if data doesn't exist
-    await seedAllDemoData()
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 

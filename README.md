@@ -34,8 +34,6 @@ backend/
 ### Frontend (React + Vite + Tailwind)
 ```
 frontend/src/
-├── components/      # Reusable components
-│   └── DashboardLayout.jsx
 ├── contexts/        # React contexts
 │   └── AuthContext.jsx
 ├── pages/           # Page components
@@ -74,10 +72,15 @@ cp .env.example .env
 # Start MongoDB (if running locally)
 mongod
 
+# Load demo data (ONE TIME ONLY - skip if data already exists)
+npm run load-data
+
 # Start backend server
-npm run dev
+npm start
 # Server will run on http://localhost:3000
 ```
+
+**Note:** The demo data loading is now a **separate step** and should only be run once during initial setup or when you want to refresh the database.
 
 ### 2. Setup Frontend
 
@@ -300,6 +303,37 @@ VITE_API_BASE=http://localhost:3000/api
 | **Applicant** | `applicant@demo.com` | `applicant123` | Personal application tracking |
 
 **Quick Login:** Demo credentials are displayed on the login page - just click any credential to auto-fill the form!
+
+## Data Management
+
+### Loading Demo Data
+
+Demo data loading is now a **separate, manual process** and does not run automatically when the server starts.
+
+#### Load Demo Data (Initial Setup)
+```bash
+cd backend
+npm run load-data
+```
+
+This will create:
+- ✅ 7 Demo Users (1 Admin, 1 Bot Mimic, 5 Applicants)
+- ✅ 8 Demo Jobs (4 Technical, 4 Non-Technical)
+- ✅ 5 Applicant Profiles (with complete information)
+- ✅ 10 Demo Applications (various statuses)
+
+#### When to Load Data
+- **First time setup** - After installing the backend
+- **After database reset** - If you cleared the database
+- **Refreshing demo data** - To restore or update demo data
+
+#### Benefits of Separate Loading
+- 🚀 **Fast Server Startup** - No seeding delay on every restart
+- 🎯 **Intentional Control** - Load data only when needed
+- 🔒 **Production Safe** - No accidental data seeding
+- 🧪 **Better Testing** - Clean slate for each test run
+
+For detailed information, see [`backend/DATA_LOADING.md`](backend/DATA_LOADING.md)
 
 ## Development
 
