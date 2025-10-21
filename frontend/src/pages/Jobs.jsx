@@ -48,7 +48,21 @@ export default function Jobs() {
     }))
   }
 
+  // Check if job deadline has passed
+  const isJobExpired = (job) => {
+    if (!job.applicationDeadline) return false
+    const deadline = new Date(job.applicationDeadline)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return deadline < today
+  }
+
   const filteredJobs = jobs.filter(job => {
+    // Hide expired or closed jobs from public view
+    if (job.status === 'closed' || isJobExpired(job)) {
+      return false
+    }
+
     const matchesSearch = 
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||

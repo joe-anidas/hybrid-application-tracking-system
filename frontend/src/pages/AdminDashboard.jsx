@@ -131,14 +131,14 @@ export default function Admin() {
         {/* Action Buttons - Bigger and more prominent */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <button 
-            onClick={() => navigate('/admin/create-job')}
+            onClick={() => navigate('/admin/manage-jobs')}
             className="flex flex-col items-center justify-center p-8 bg-white border-2 border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-indigo-500 transition-all group"
           >
             <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-indigo-600 transition-colors">
-              <Plus className="h-8 w-8 text-indigo-600 group-hover:text-white transition-colors" />
+              <Briefcase className="h-8 w-8 text-indigo-600 group-hover:text-white transition-colors" />
             </div>
-            <span className="text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">Create Job Posting</span>
-            <span className="text-sm text-gray-500 mt-1">Add new position</span>
+            <span className="text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">Manage Job Postings</span>
+            <span className="text-sm text-gray-500 mt-1">Create, edit & delete jobs</span>
           </button>
           
           <button 

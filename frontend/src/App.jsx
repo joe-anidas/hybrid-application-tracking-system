@@ -8,6 +8,8 @@ import Register from './pages/Register.jsx'
 import Admin from './pages/AdminDashboard.jsx'
 import AnalyticsDashboard from './pages/AnalyticsDashboard.jsx'
 import CreateJob from './pages/CreateJob.jsx'
+import EditJob from './pages/EditJob.jsx'
+import ManageJobs from './pages/ManageJobs.jsx'
 import ReviewApplications from './pages/ReviewApplications.jsx'
 import Jobs from './pages/Jobs.jsx'
 import JobDetails from './pages/JobDetails.jsx'
@@ -290,6 +292,22 @@ function AppContent() {
           element={
             <ProtectedRoute allowedRoles={['Admin']}>
               <CreateJob />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/edit-job/:id" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <EditJob />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/manage-jobs" 
+          element={
+            <ProtectedRoute allowedRoles={['Admin']}>
+              <ManageJobs />
             </ProtectedRoute>
           } 
         />
