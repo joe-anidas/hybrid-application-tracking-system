@@ -73,7 +73,7 @@ const applicantProfileSchema = new mongoose.Schema(
 )
 
 // Index for better performance
-applicantProfileSchema.index({ user: 1 })
+// Note: user field already has unique: true which creates an index
 applicantProfileSchema.index({ email: 1 })
 
 const ApplicantProfile = mongoose.model('ApplicantProfile', applicantProfileSchema)

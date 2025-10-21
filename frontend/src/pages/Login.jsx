@@ -97,11 +97,13 @@ export default function Login() {
           {error && <div className="mb-4 text-red-600">{error}</div>}
         <input
           type="email"
+          name="email"
           placeholder="Email"
           className="w-full mb-4 p-2 border rounded"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          autoComplete="email"
         />
         <input
           type="password"

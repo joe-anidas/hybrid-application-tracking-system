@@ -33,27 +33,33 @@ export default function Register() {
           {error && <div className="mb-4 text-red-600">{error}</div>}
         <input
           type="text"
+          name="name"
           placeholder="Name"
           className="w-full mb-4 p-2 border rounded"
           value={name}
           onChange={e => setName(e.target.value)}
           required
+          autoComplete="name"
         />
         <input
           type="email"
+          name="email"
           placeholder="Email"
           className="w-full mb-4 p-2 border rounded"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          autoComplete="email"
         />
         <input
           type="password"
+          name="password"
           placeholder="Password"
           className="w-full mb-4 p-2 border rounded"
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
+          autoComplete="new-password"
         />
         <button type="submit" className="w-full bg-slate-900 text-white py-2 rounded hover:bg-slate-800">Register as Applicant</button>
         <div className="mt-4 text-center text-sm">
