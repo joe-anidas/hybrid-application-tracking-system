@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import { getProfile } from '../services/auth'
+import { getProfile, logoutUser } from '../services/auth'
 
 const AuthContext = createContext()
 
@@ -47,10 +47,19 @@ export const AuthProvider = ({ children }) => {
     setError(null)
   }
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    setUser(null)
-    setError(null)
+  const logout = async () => {
+    try {
+      // Call backend logout endpoint to log the action
+      await logoutUser()
+    } catch (err) {
+      console.error('Logout API call failed:', err)
+      // Continue with logout even if API call fails
+    } finally {
+      // Always clear local state
+      localStorage.removeItem('token')
+      setUser(null)
+      setError(null)
+    }
   }
 
   const value = {

@@ -7,6 +7,7 @@ import Application from '../models/Application.js'
 import ApplicantProfile from '../models/ApplicantProfile.js'
 import Job from '../models/Job.js'
 import { authenticateToken } from '../middleware/auth.js'
+import { createAuditLog, getClientIp } from '../utils/auditLogger.js'
 
 const router = express.Router()
 
@@ -151,6 +152,25 @@ router.post('/submit', authenticateToken, upload.single('resume'), async (req, r
       { path: 'profile' }
     ])
 
+    // Create audit log for application submission
+    await createAuditLog({
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: 'Applicant',
+      action: 'APPLICATION_SUBMITTED',
+      actionDescription: `${req.user.name} (Applicant) submitted application for ${job.title}`,
+      targetType: 'Application',
+      targetId: application._id,
+      targetName: `${req.user.name} - ${job.title}`,
+      ipAddress: getClientIp(req),
+      metadata: {
+        jobId: job._id,
+        jobTitle: job.title,
+        department: job.department,
+        resumeFileName: req.file.originalname
+      }
+    })
+
     res.status(201).json({
       success: true,
       message: 'Application submitted successfully',
@@ -200,13 +220,30 @@ router.get('/my-applications', authenticateToken, async (req, res) => {
     }
 
     const applications = await Application.find({ applicant: req.user.id })
-      .populate('job', 'title department location type jobType status applicants')
+      .populate('job', 'title department location type jobType status')
       .populate('profile')
       .sort({ createdAt: -1 })
 
+    // For each application, get the actual applicant count for that job
+    const applicationsWithCounts = await Promise.all(
+      applications.map(async (app) => {
+        if (app.job) {
+          const applicantCount = await Application.countDocuments({ 
+            job: app.job._id 
+          })
+          // Add applicants count to the job object
+          app.job = {
+            ...app.job.toObject(),
+            applicants: applicantCount
+          }
+        }
+        return app
+      })
+    )
+
     res.json({
       success: true,
-      applications
+      applications: applicationsWithCounts
     })
 
   } catch (error) {
@@ -435,6 +472,8 @@ router.put('/admin/:id/status', authenticateToken, async (req, res) => {
     }
 
     const application = await Application.findById(req.params.id)
+      .populate('applicant', 'name email')
+      .populate('job', 'title department location type')
 
     if (!application) {
       return res.status(404).json({
@@ -443,8 +482,13 @@ router.put('/admin/:id/status', authenticateToken, async (req, res) => {
       })
     }
 
+    // Store previous status for audit log
+    const previousStatus = application.status
+    let statusChanged = false
+
     // Update fields if provided
     if (status && status !== application.status) {
+      statusChanged = true
       // Record status change in history
       application.statusHistory.push({
         status: status,
@@ -462,11 +506,29 @@ router.put('/admin/:id/status', authenticateToken, async (req, res) => {
     
     await application.save()
 
-    await application.populate([
-      { path: 'applicant', select: 'name email' },
-      { path: 'job', select: 'title department location type' },
-      { path: 'profile' }
-    ])
+    // Create audit log for status update
+    if (statusChanged) {
+      await createAuditLog({
+        userId: req.user.id,
+        userName: req.user.name,
+        userRole: 'Admin',
+        action: 'APPLICATION_STATUS_UPDATED',
+        actionDescription: `${req.user.name} (Admin) updated application status from ${previousStatus} to ${status}`,
+        targetType: 'Application',
+        targetId: application._id,
+        targetName: `${application.applicant.name} - ${application.job.title}`,
+        ipAddress: getClientIp(req),
+        metadata: {
+          previousStatus,
+          newStatus: status,
+          applicantName: application.applicant.name,
+          jobTitle: application.job.title,
+          notes: notes || null
+        }
+      })
+    }
+
+    await application.populate('profile')
 
     res.json({
       success: true,

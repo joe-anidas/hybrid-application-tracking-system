@@ -29,9 +29,7 @@ const auditLogSchema = new mongoose.Schema(
         'USER_REGISTER',
         // User Management
         'USER_CREATED',
-        'USER_UPDATED',
         'USER_DELETED',
-        'USER_VIEWED',
         // Job Management
         'JOB_CREATED',
         'JOB_UPDATED',
@@ -40,8 +38,6 @@ const auditLogSchema = new mongoose.Schema(
         // Application Management
         'APPLICATION_SUBMITTED',
         'APPLICATION_STATUS_UPDATED',
-        'APPLICATION_UPDATED',
-        'APPLICATION_DELETED',
         'APPLICATION_VIEWED',
         // Profile Management
         'PROFILE_CREATED',
@@ -50,11 +46,7 @@ const auditLogSchema = new mongoose.Schema(
         // Bot Mimic Activities
         'BOT_PROCESS_SINGLE',
         'BOT_PROCESS_BATCH',
-        'BOT_ACTIVITY_VIEWED',
-        // Dashboard & System
-        'DASHBOARD_VIEWED',
-        'DATA_ACCESSED',
-        'API_REQUEST'
+        'BOT_AUTO_PROCESS'
       ]
     },
     actionDescription: {

@@ -19,4 +19,33 @@ router.get('/me', requireAuth, (req, res) => {
 	res.json({ user: req.user })
 })
 
+// POST /api/auth/logout - logout endpoint (for audit logging)
+router.post('/logout', requireAuth, async (req, res) => {
+	try {
+		// Import audit logger
+		const { createAuditLog, getClientIp } = await import('../utils/auditLogger.js')
+		
+		// Log the logout
+		await createAuditLog({
+			userId: req.user.id,
+			userName: req.user.name,
+			userRole: req.user.role,
+			action: 'USER_LOGOUT',
+			actionDescription: `${req.user.name} (${req.user.role}) logged out`,
+			targetType: 'Auth',
+			ipAddress: getClientIp(req)
+		})
+
+		res.json({
+			message: 'Logged out successfully'
+		})
+	} catch (err) {
+		console.error('Logout error:', err)
+		// Still return success even if audit logging fails
+		res.json({
+			message: 'Logged out successfully'
+		})
+	}
+})
+
 export default router

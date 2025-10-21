@@ -67,11 +67,11 @@ const AuditLogs = () => {
         return <User className="h-4 w-4 text-orange-600" />
       case 'BOT_PROCESS_SINGLE':
       case 'BOT_PROCESS_BATCH':
+      case 'BOT_AUTO_PROCESS':
+      case 'BOT_COMMENT_ADDED':
       case 'BOT_ACTIVITY_VIEWED':
         return <Bot className="h-4 w-4 text-green-600" />
       case 'DASHBOARD_VIEWED':
-      case 'DATA_ACCESSED':
-      case 'API_REQUEST':
         return <Activity className="h-4 w-4 text-gray-600" />
       default:
         return <Activity className="h-4 w-4 text-gray-600" />
@@ -85,8 +85,6 @@ const AuditLogs = () => {
         return 'bg-blue-100 text-blue-800'
       case 'USER_REGISTER':
       case 'USER_CREATED':
-      case 'USER_UPDATED':
-      case 'USER_VIEWED':
         return 'bg-green-100 text-green-800'
       case 'USER_DELETED':
         return 'bg-red-100 text-red-800'
@@ -97,8 +95,6 @@ const AuditLogs = () => {
         return 'bg-purple-100 text-purple-800'
       case 'APPLICATION_SUBMITTED':
       case 'APPLICATION_STATUS_UPDATED':
-      case 'APPLICATION_UPDATED':
-      case 'APPLICATION_DELETED':
       case 'APPLICATION_VIEWED':
         return 'bg-indigo-100 text-indigo-800'
       case 'PROFILE_UPDATED':
@@ -107,12 +103,8 @@ const AuditLogs = () => {
         return 'bg-orange-100 text-orange-800'
       case 'BOT_PROCESS_SINGLE':
       case 'BOT_PROCESS_BATCH':
-      case 'BOT_ACTIVITY_VIEWED':
+      case 'BOT_AUTO_PROCESS':
         return 'bg-green-100 text-green-800'
-      case 'DASHBOARD_VIEWED':
-      case 'DATA_ACCESSED':
-      case 'API_REQUEST':
-        return 'bg-gray-100 text-gray-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -275,9 +267,7 @@ const AuditLogs = () => {
                   </optgroup>
                   <optgroup label="User Management">
                     <option value="USER_CREATED">User Created</option>
-                    <option value="USER_UPDATED">User Updated</option>
                     <option value="USER_DELETED">User Deleted</option>
-                    <option value="USER_VIEWED">User Viewed</option>
                   </optgroup>
                   <optgroup label="Job Management">
                     <option value="JOB_CREATED">Job Created</option>
@@ -288,8 +278,6 @@ const AuditLogs = () => {
                   <optgroup label="Applications">
                     <option value="APPLICATION_SUBMITTED">Application Submitted</option>
                     <option value="APPLICATION_STATUS_UPDATED">Status Updated</option>
-                    <option value="APPLICATION_UPDATED">Application Updated</option>
-                    <option value="APPLICATION_DELETED">Application Deleted</option>
                     <option value="APPLICATION_VIEWED">Application Viewed</option>
                   </optgroup>
                   <optgroup label="Profile Management">
@@ -300,12 +288,7 @@ const AuditLogs = () => {
                   <optgroup label="Bot Mimic">
                     <option value="BOT_PROCESS_SINGLE">Bot Process Single</option>
                     <option value="BOT_PROCESS_BATCH">Bot Process Batch</option>
-                    <option value="BOT_ACTIVITY_VIEWED">Bot Activity Viewed</option>
-                  </optgroup>
-                  <optgroup label="System">
-                    <option value="DASHBOARD_VIEWED">Dashboard Viewed</option>
-                    <option value="DATA_ACCESSED">Data Accessed</option>
-                    <option value="API_REQUEST">API Request</option>
+                    <option value="BOT_AUTO_PROCESS">Bot Auto Process</option>
                   </optgroup>
                 </select>
               </div>
@@ -373,7 +356,13 @@ const AuditLogs = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {logs.map((log) => (
+                {logs.map((log) => {
+                  // Use populated user data if available, otherwise fall back to stored values
+                  const userName = log.user?.name || log.userName || 'System'
+                  const userRole = log.user?.role || log.userRole || 'System'
+                  const targetType = log.targetType || 'System'
+                  
+                  return (
                   <tr key={log._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatDate(log.createdAt)}
@@ -381,11 +370,11 @@ const AuditLogs = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 mr-2">
-                          {getRoleIcon(log.userRole)}
+                          {getRoleIcon(userRole)}
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{log.userName}</div>
-                          <div className="text-xs text-gray-500">{log.userRole}</div>
+                          <div className="text-sm font-medium text-gray-900">{userName}</div>
+                          <div className="text-xs text-gray-500">{userRole}</div>
                         </div>
                       </div>
                     </td>
@@ -398,8 +387,8 @@ const AuditLogs = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getResourceBadgeColor(log.targetType)}`}>
-                        {log.targetType || 'System'}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getResourceBadgeColor(targetType)}`}>
+                        {targetType}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 max-w-md">
@@ -409,7 +398,7 @@ const AuditLogs = () => {
                       {log.ipAddress || 'N/A'}
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>

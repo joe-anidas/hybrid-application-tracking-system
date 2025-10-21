@@ -50,7 +50,7 @@ export const auditMiddleware = async (req, res, next) => {
       const responseTime = Date.now() - requestStartTime
 
       // Determine action type and description based on method and path
-      const { action, actionDescription, targetType } = parseRequestAction(
+      const actionResult = parseRequestAction(
         req.method,
         req.path,
         req.body,
@@ -58,13 +58,15 @@ export const auditMiddleware = async (req, res, next) => {
         user
       )
 
-      // Extract target information
-      const { targetId, targetName } = extractTargetInfo(req, responseBody)
-
       // Only log if we have a valid action (skip health checks, etc.)
-      if (!action) {
+      if (!actionResult || !actionResult.action) {
         return
       }
+
+      const { action, actionDescription, targetType } = actionResult
+
+      // Extract target information
+      const { targetId, targetName } = extractTargetInfo(req, responseBody)
 
       // Create audit log
       await AuditLog.create({
@@ -100,58 +102,68 @@ export const auditMiddleware = async (req, res, next) => {
  * Parse request to determine action type and description
  */
 function parseRequestAction(method, path, body, responseBody, user) {
-  const userName = user?.name || user?.email || 'User'
+  const userName = user?.name || user?.email || 'Anonymous User'
+  const userRole = user?.role || 'Anonymous'
   
   // Authentication routes
   if (path.includes('/api/auth/login')) {
     return {
       action: 'USER_LOGIN',
-      actionDescription: `${userName} logged in`,
+      actionDescription: `${userName} (${userRole}) logged in`,
       targetType: 'Auth'
     }
   }
   if (path.includes('/api/auth/logout')) {
     return {
       action: 'USER_LOGOUT',
-      actionDescription: `${userName} logged out`,
+      actionDescription: `${userName} (${userRole}) logged out`,
       targetType: 'Auth'
     }
   }
   if (path.includes('/api/auth/register')) {
+    const role = body?.role || 'Applicant'
     return {
       action: 'USER_REGISTER',
-      actionDescription: `New user registered: ${body?.email}`,
+      actionDescription: `New ${role} registered: ${body?.name || body?.email}`,
       targetType: 'User'
     }
   }
 
   // Job routes
   if (path.includes('/api/jobs')) {
-    if (method === 'POST') {
+    if (method === 'POST' && path.includes('/create')) {
       return {
         action: 'JOB_CREATED',
-        actionDescription: `${userName} created job: ${body?.title}`,
+        actionDescription: `${userName} (${userRole}) created job: ${body?.title || 'Untitled Job'}`,
         targetType: 'Job'
       }
     }
     if (method === 'PUT' || method === 'PATCH') {
+      const jobTitle = body?.title || extractJobNameFromResponse(responseBody) || 'Job'
       return {
         action: 'JOB_UPDATED',
-        actionDescription: `${userName} updated job: ${body?.title || 'Job'}`,
+        actionDescription: `${userName} (${userRole}) updated job: ${jobTitle}`,
         targetType: 'Job'
       }
     }
     if (method === 'DELETE') {
       return {
         action: 'JOB_DELETED',
-        actionDescription: `${userName} deleted a job`,
+        actionDescription: `${userName} (${userRole}) deleted a job`,
+        targetType: 'Job'
+      }
+    }
+    if (method === 'GET' && path.match(/\/api\/jobs\/[a-f\d]{24}/i)) {
+      return {
+        action: 'JOB_VIEWED',
+        actionDescription: `${userName} (${userRole}) viewed job details`,
         targetType: 'Job'
       }
     }
     if (method === 'GET') {
       return {
         action: 'JOB_VIEWED',
-        actionDescription: `${userName} viewed job listings`,
+        actionDescription: `${userName} (${userRole}) viewed job listings`,
         targetType: 'Job'
       }
     }
@@ -159,38 +171,56 @@ function parseRequestAction(method, path, body, responseBody, user) {
 
   // Application routes
   if (path.includes('/api/applications')) {
-    if (method === 'POST') {
+    // Application submission
+    if (method === 'POST' && path.includes('/submit')) {
+      const jobTitle = body?.jobTitle || 'job'
       return {
         action: 'APPLICATION_SUBMITTED',
-        actionDescription: `${userName} submitted an application`,
+        actionDescription: `${userName} (Applicant) submitted application for ${jobTitle}`,
         targetType: 'Application'
       }
     }
-    if (method === 'PUT' || method === 'PATCH') {
-      if (body?.status) {
-        return {
-          action: 'APPLICATION_STATUS_UPDATED',
-          actionDescription: `${userName} updated application status to: ${body.status}`,
-          targetType: 'Application'
-        }
+    
+    // Status update
+    if ((method === 'PUT' || method === 'PATCH') && path.includes('/status')) {
+      const newStatus = body?.status || 'unknown'
+      const previousStatus = body?.previousStatus || 'previous'
+      return {
+        action: 'APPLICATION_STATUS_UPDATED',
+        actionDescription: `${userName} (${userRole}) updated application status from ${previousStatus} to ${newStatus}`,
+        targetType: 'Application'
       }
+    }
+    
+    // General update
+    if (method === 'PUT' || method === 'PATCH') {
       return {
         action: 'APPLICATION_UPDATED',
-        actionDescription: `${userName} updated an application`,
+        actionDescription: `${userName} (${userRole}) updated an application`,
         targetType: 'Application'
       }
     }
+    
     if (method === 'DELETE') {
       return {
         action: 'APPLICATION_DELETED',
-        actionDescription: `${userName} deleted an application`,
+        actionDescription: `${userName} (${userRole}) deleted an application`,
         targetType: 'Application'
       }
     }
+    
+    if (method === 'GET' && path.match(/\/api\/applications\/[a-f\d]{24}/i)) {
+      return {
+        action: 'APPLICATION_VIEWED',
+        actionDescription: `${userName} (${userRole}) viewed application details`,
+        targetType: 'Application'
+      }
+    }
+    
     if (method === 'GET') {
       return {
         action: 'APPLICATION_VIEWED',
-        actionDescription: `${userName} viewed application(s)`,
+        actionDescription: `${userName} (${userRole}) viewed application list`,
         targetType: 'Application'
       }
     }
@@ -201,21 +231,21 @@ function parseRequestAction(method, path, body, responseBody, user) {
     if (method === 'POST') {
       return {
         action: 'PROFILE_CREATED',
-        actionDescription: `${userName} created their profile`,
+        actionDescription: `${userName} (Applicant) created their profile`,
         targetType: 'Profile'
       }
     }
     if (method === 'PUT' || method === 'PATCH') {
       return {
         action: 'PROFILE_UPDATED',
-        actionDescription: `${userName} updated their profile`,
+        actionDescription: `${userName} (Applicant) updated their profile`,
         targetType: 'Profile'
       }
     }
     if (method === 'GET') {
       return {
         action: 'PROFILE_VIEWED',
-        actionDescription: `${userName} viewed profile`,
+        actionDescription: `${userName} (${userRole}) viewed profile`,
         targetType: 'Profile'
       }
     }
@@ -224,30 +254,39 @@ function parseRequestAction(method, path, body, responseBody, user) {
   // User management routes
   if (path.includes('/api/users')) {
     if (method === 'POST') {
+      const createdRole = body?.role || 'User'
+      const createdName = body?.name || body?.email || 'user'
       return {
         action: 'USER_CREATED',
-        actionDescription: `${userName} created a new user`,
+        actionDescription: `${userName} (Admin) created ${createdRole} user: ${createdName}`,
         targetType: 'User'
       }
     }
     if (method === 'PUT' || method === 'PATCH') {
       return {
         action: 'USER_UPDATED',
-        actionDescription: `${userName} updated user information`,
+        actionDescription: `${userName} (Admin) updated user information`,
         targetType: 'User'
       }
     }
     if (method === 'DELETE') {
       return {
         action: 'USER_DELETED',
-        actionDescription: `${userName} deleted a user`,
+        actionDescription: `${userName} (Admin) deleted a user`,
+        targetType: 'User'
+      }
+    }
+    if (method === 'GET' && path.match(/\/api\/users\/[a-f\d]{24}/i)) {
+      return {
+        action: 'USER_VIEWED',
+        actionDescription: `${userName} (${userRole}) viewed user details`,
         targetType: 'User'
       }
     }
     if (method === 'GET') {
       return {
         action: 'USER_VIEWED',
-        actionDescription: `${userName} viewed user(s)`,
+        actionDescription: `${userName} (Admin) viewed user list`,
         targetType: 'User'
       }
     }
@@ -258,21 +297,36 @@ function parseRequestAction(method, path, body, responseBody, user) {
     if (path.includes('/process-single')) {
       return {
         action: 'BOT_PROCESS_SINGLE',
-        actionDescription: `Bot Mimic processed single application`,
+        actionDescription: `${userName} (Bot Mimic) processed single application`,
         targetType: 'Application'
       }
     }
     if (path.includes('/process-batch')) {
+      const limit = body?.limit || 'multiple'
       return {
         action: 'BOT_PROCESS_BATCH',
-        actionDescription: `Bot Mimic processed batch of applications`,
+        actionDescription: `${userName} (Bot Mimic) processed batch of ${limit} applications`,
         targetType: 'Application'
+      }
+    }
+    if (path.includes('/auto-process') && method === 'POST') {
+      return {
+        action: 'BOT_AUTO_PROCESS',
+        actionDescription: `${userName} (Bot Mimic) triggered auto-process`,
+        targetType: 'System'
+      }
+    }
+    if (method === 'GET' && path.includes('/activity')) {
+      return {
+        action: 'BOT_ACTIVITY_VIEWED',
+        actionDescription: `${userName} (Bot Mimic) viewed bot activity dashboard`,
+        targetType: 'System'
       }
     }
     if (method === 'GET') {
       return {
         action: 'BOT_ACTIVITY_VIEWED',
-        actionDescription: `${userName} viewed bot mimic dashboard`,
+        actionDescription: `${userName} (${userRole}) viewed bot mimic dashboard`,
         targetType: 'System'
       }
     }
@@ -280,27 +334,49 @@ function parseRequestAction(method, path, body, responseBody, user) {
 
   // Dashboard routes
   if (path.includes('/api/dashboard')) {
+    if (path.includes('/admin')) {
+      return {
+        action: 'DASHBOARD_VIEWED',
+        actionDescription: `${userName} (Admin) viewed admin dashboard`,
+        targetType: 'System'
+      }
+    }
+    if (path.includes('/applicant')) {
+      return {
+        action: 'DASHBOARD_VIEWED',
+        actionDescription: `${userName} (Applicant) viewed applicant dashboard`,
+        targetType: 'System'
+      }
+    }
+    if (path.includes('/analytics')) {
+      return {
+        action: 'DASHBOARD_VIEWED',
+        actionDescription: `${userName} (${userRole}) viewed analytics dashboard`,
+        targetType: 'System'
+      }
+    }
     return {
       action: 'DASHBOARD_VIEWED',
-      actionDescription: `${userName} viewed dashboard`,
+      actionDescription: `${userName} (${userRole}) viewed dashboard`,
       targetType: 'System'
     }
   }
 
-  // Default for other API calls
-  if (method === 'GET') {
-    return {
-      action: 'DATA_ACCESSED',
-      actionDescription: `${userName} accessed ${path}`,
-      targetType: 'System'
-    }
+  // Audit log access
+  if (path.includes('/api/audit-logs')) {
+    return null // Skip logging audit log queries to prevent recursion
   }
 
-  return {
-    action: 'API_REQUEST',
-    actionDescription: `${userName} made ${method} request to ${path}`,
-    targetType: 'System'
-  }
+  // Skip logging for general GET requests that don't match specific patterns
+  return null
+}
+
+/**
+ * Helper to extract job name from response
+ */
+function extractJobNameFromResponse(responseBody) {
+  if (!responseBody || typeof responseBody !== 'object') return null
+  return responseBody.job?.title || responseBody.title || null
 }
 
 /**

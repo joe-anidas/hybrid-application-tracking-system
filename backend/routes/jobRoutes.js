@@ -1,6 +1,7 @@
 import express from 'express'
 import Job from '../models/Job.js'
 import { authenticateToken } from '../middleware/auth.js'
+import { createAuditLog, getClientIp } from '../utils/auditLogger.js'
 
 const router = express.Router()
 
@@ -63,6 +64,26 @@ router.post('/create', authenticateToken, async (req, res) => {
     
     // Populate the createdBy field for response
     await savedJob.populate('createdBy', 'name email')
+
+    // Create audit log for job creation
+    await createAuditLog({
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: 'Admin',
+      action: 'JOB_CREATED',
+      actionDescription: `${req.user.name} (Admin) created job: ${title}`,
+      targetType: 'Job',
+      targetId: savedJob._id,
+      targetName: title,
+      ipAddress: getClientIp(req),
+      metadata: {
+        department,
+        location,
+        type,
+        jobType,
+        level
+      }
+    })
 
     res.status(201).json({
       success: true,
@@ -185,11 +206,34 @@ router.put('/:id', authenticateToken, async (req, res) => {
       })
     }
 
+    // Store old title for audit log
+    const oldTitle = job.title
+
     // Update job with new data
     Object.assign(job, req.body)
     
     const updatedJob = await job.save()
     await updatedJob.populate('createdBy', 'name email')
+
+    // Create audit log for job update
+    await createAuditLog({
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: 'Admin',
+      action: 'JOB_UPDATED',
+      actionDescription: `${req.user.name} (Admin) updated job: ${updatedJob.title}`,
+      targetType: 'Job',
+      targetId: updatedJob._id,
+      targetName: updatedJob.title,
+      ipAddress: getClientIp(req),
+      metadata: {
+        oldTitle,
+        newTitle: updatedJob.title,
+        department: updatedJob.department,
+        location: updatedJob.location,
+        status: updatedJob.status
+      }
+    })
 
     res.json({
       success: true,
@@ -236,7 +280,29 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       })
     }
 
+    // Store job details for audit log before deletion
+    const jobTitle = job.title
+    const jobId = job._id
+
     await Job.findByIdAndDelete(req.params.id)
+
+    // Create audit log for job deletion
+    await createAuditLog({
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: 'Admin',
+      action: 'JOB_DELETED',
+      actionDescription: `${req.user.name} (Admin) deleted job: ${jobTitle}`,
+      targetType: 'Job',
+      targetId: jobId,
+      targetName: jobTitle,
+      ipAddress: getClientIp(req),
+      metadata: {
+        deletedTitle: jobTitle,
+        department: job.department,
+        location: job.location
+      }
+    })
 
     res.json({
       success: true,

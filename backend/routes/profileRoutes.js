@@ -1,6 +1,7 @@
 import express from 'express'
 import ApplicantProfile from '../models/ApplicantProfile.js'
 import { authenticateToken } from '../middleware/auth.js'
+import { createAuditLog, getClientIp } from '../utils/auditLogger.js'
 
 const router = express.Router()
 
@@ -74,6 +75,7 @@ router.put('/', authenticateToken, async (req, res) => {
 
     // Find existing profile or create new one
     let profile = await ApplicantProfile.findOne({ user: req.user.id })
+    let isNewProfile = !profile
 
     if (profile) {
       // Update existing profile
@@ -111,6 +113,28 @@ router.put('/', authenticateToken, async (req, res) => {
       
       await profile.save()
     }
+
+    // Create audit log
+    await createAuditLog({
+      userId: req.user.id,
+      userName: req.user.name,
+      userRole: 'Applicant',
+      action: isNewProfile ? 'PROFILE_CREATED' : 'PROFILE_UPDATED',
+      actionDescription: isNewProfile 
+        ? `${req.user.name} (Applicant) created their profile`
+        : `${req.user.name} (Applicant) updated their profile`,
+      targetType: 'Profile',
+      targetId: profile._id,
+      targetName: fullName,
+      ipAddress: getClientIp(req),
+      metadata: {
+        fullName,
+        location,
+        skillsCount: skills?.length || 0,
+        experienceCount: experience?.length || 0,
+        educationCount: education?.length || 0
+      }
+    })
 
     res.json({
       success: true,
