@@ -19,10 +19,18 @@ import {
   Cell, 
   ResponsiveContainer, 
   Tooltip, 
-  Legend 
+  Legend,
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  LineChart,
+  Line
 } from 'recharts'
 import { getAllApplications } from '../services/applications'
 import { getAllJobs } from '../services/jobs'
+import { getAllUsers } from '../services/users'
 
 export default function AnalyticsDashboard() {
   const navigate = useNavigate()
@@ -42,6 +50,7 @@ export default function AnalyticsDashboard() {
     avgProcessingTime: 0,
     conversionRate: 0
   })
+  const [timeFilter, setTimeFilter] = useState('day') // 'day', 'hour', 'month'
 
   useEffect(() => {
     fetchData()
@@ -50,6 +59,8 @@ export default function AnalyticsDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true)
+      
+      // Fetch applications and jobs
       const [appsResponse, jobsResponse] = await Promise.all([
         getAllApplications(),
         getAllJobs({ status: 'active' })
@@ -58,9 +69,18 @@ export default function AnalyticsDashboard() {
       const apps = appsResponse.applications || []
       const jobsList = jobsResponse.jobs || []
 
+      // Try to fetch users, but don't fail if it errors
+      let usersList = []
+      try {
+        const usersResponse = await getAllUsers()
+        usersList = usersResponse.users || usersResponse || []
+      } catch (userError) {
+        console.error('Error fetching users (non-critical):', userError)
+      }
+
       setApplications(apps)
       setJobs(jobsList)
-      calculateAnalytics(apps, jobsList)
+      calculateAnalytics(apps, jobsList, usersList)
     } catch (error) {
       console.error('Error fetching analytics data:', error)
     } finally {
@@ -68,7 +88,10 @@ export default function AnalyticsDashboard() {
     }
   }
 
-  const calculateAnalytics = (apps, jobsList) => {
+  const calculateAnalytics = (apps, jobsList, usersList) => {
+    console.log('Apps sample:', apps[0]) // Debug
+    console.log('Users list:', usersList) // Debug
+    
     const total = apps.length
     const submitted = apps.filter(a => a.status === 'submitted').length
     const underReview = apps.filter(a => a.status === 'under-review').length
@@ -76,37 +99,102 @@ export default function AnalyticsDashboard() {
     const accepted = apps.filter(a => a.status === 'accepted').length
     const rejected = apps.filter(a => a.status === 'rejected').length
 
-    // Count non-technical applications
-    const nonTechnicalApplications = apps.filter(app => 
-      app.jobId?.jobType === 'non-technical'
-    ).length
+    // Count non-technical applications - check both 'job' and 'jobId'
+    const nonTechnicalApplications = apps.filter(app => {
+      const job = app.job || app.jobId
+      return job && job.jobType === 'non-technical'
+    }).length
 
-    // Count total users (would need API call, using placeholder)
-    const totalUsers = 0 // This would come from API
+    // Count total applicants (users with role 'applicant' or 'Applicant')
+    const totalApplicants = Array.isArray(usersList) 
+      ? usersList.filter(user => 
+          user.role && (user.role.toLowerCase() === 'applicant')
+        ).length 
+      : 0
 
-    // By Department
+    console.log('Total Applicants:', totalApplicants) // Debug
+
+    // By Department - check both 'job' and 'jobId'
     const byDepartment = {}
     apps.forEach(app => {
-      const dept = app.jobId?.department || 'Unknown'
-      byDepartment[dept] = (byDepartment[dept] || 0) + 1
+      const job = app.job || app.jobId
+      if (job && job.department) {
+        const dept = job.department
+        byDepartment[dept] = (byDepartment[dept] || 0) + 1
+      }
     })
 
-    // By Job Type
+    console.log('By Department:', byDepartment) // Debug
+
+    // By Job Type - check both 'job' and 'jobId'
     const byJobType = {
       technical: 0,
       'non-technical': 0
     }
     apps.forEach(app => {
-      const type = app.jobId?.jobType || 'non-technical'
-      byJobType[type] = (byJobType[type] || 0) + 1
+      const job = app.job || app.jobId
+      if (job && job.jobType) {
+        const type = job.jobType
+        byJobType[type] = (byJobType[type] || 0) + 1
+      }
     })
 
-    // By Month (sorted chronologically)
-    const byMonth = {}
+    console.log('By Job Type:', byJobType) // Debug
+
+    // By Day (last 30 days)
+    const byDay = {}
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dayKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      byDay[dayKey] = 0
+    }
+    
     apps.forEach(app => {
       const date = new Date(app.createdAt || app.submittedAt)
-      const monthYear = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-      byMonth[monthYear] = (byMonth[monthYear] || 0) + 1
+      const dayKey = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      if (byDay.hasOwnProperty(dayKey)) {
+        byDay[dayKey] = (byDay[dayKey] || 0) + 1
+      }
+    })
+
+    // By Hour (last 24 hours)
+    const byHour = {}
+    for (let i = 23; i >= 0; i--) {
+      const date = new Date()
+      date.setHours(date.getHours() - i)
+      const hourKey = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+      byHour[hourKey] = 0
+    }
+    
+    apps.forEach(app => {
+      const date = new Date(app.createdAt || app.submittedAt)
+      const now = new Date()
+      const hoursDiff = (now - date) / (1000 * 60 * 60)
+      
+      if (hoursDiff <= 24) {
+        const hourKey = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+        if (byHour.hasOwnProperty(hourKey)) {
+          byHour[hourKey] = (byHour[hourKey] || 0) + 1
+        }
+      }
+    })
+
+    // By Month (last 12 months)
+    const byMonth = {}
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date()
+      date.setMonth(date.getMonth() - i)
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      byMonth[monthKey] = 0
+    }
+    
+    apps.forEach(app => {
+      const date = new Date(app.createdAt || app.submittedAt)
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      if (byMonth.hasOwnProperty(monthKey)) {
+        byMonth[monthKey] = (byMonth[monthKey] || 0) + 1
+      }
     })
 
     // Conversion Rate
@@ -119,10 +207,12 @@ export default function AnalyticsDashboard() {
       shortlisted,
       accepted,
       rejected,
-      totalUsers,
+      totalApplicants,
       nonTechnicalApplications,
       byDepartment,
       byJobType,
+      byDay,
+      byHour,
       byMonth,
       conversionRate
     })
@@ -147,31 +237,189 @@ export default function AnalyticsDashboard() {
     </div>
   )
 
-  const BarChart = ({ data, title, color = 'bg-indigo-500' }) => {
-    const maxValue = Math.max(...Object.values(data))
-    
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <BarChart3 className="h-5 w-5 mr-2 text-indigo-600" />
-          {title}
-        </h3>
-        <div className="space-y-3">
-          {Object.entries(data).map(([key, value]) => (
-            <div key={key}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-gray-700">{key}</span>
-                <span className="text-sm font-semibold text-gray-900">{value}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  className={`${color} h-3 rounded-full transition-all duration-500`}
-                  style={{ width: `${(value / maxValue) * 100}%` }}
-                />
-              </div>
-            </div>
-          ))}
+  const DepartmentPieChart = () => {
+    const departmentColors = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#EF4444']
+    const data = Object.entries(analytics.byDepartment)
+      .filter(([_, value]) => value > 0)
+      .map(([name, value], index) => ({
+        name,
+        value,
+        color: departmentColors[index % departmentColors.length]
+      }))
+
+    console.log('Department Pie Chart Data:', data) // Debug
+
+    if (data.length === 0) {
+      return (
+        <div className="bg-white shadow rounded-lg p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+            <PieChart className="h-5 w-5 mr-2 text-indigo-600" />
+            Applications by Department
+          </h3>
+          <div className="flex items-center justify-center h-[300px] text-gray-500">
+            No department data available
+          </div>
         </div>
+      )
+    }
+
+    return (
+      <div className="bg-white shadow rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+          <PieChart className="h-5 w-5 mr-2 text-indigo-600" />
+          Applications by Department
+        </h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <RechartsPieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              labelLine={true}
+              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+              outerRadius={100}
+              fill="#8884d8"
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </RechartsPieChart>
+        </ResponsiveContainer>
+      </div>
+    )
+  }
+
+  const JobTypeLineChart = () => {
+    const data = Object.entries(analytics.byJobType).map(([name, value]) => ({
+      name: name === 'technical' ? 'Technical' : 'Non-Technical',
+      applications: value,
+      fill: name === 'technical' ? '#6366F1' : '#EC4899' // Indigo for technical, Pink for non-technical
+    }))
+
+    return (
+      <div className="bg-white shadow rounded-lg p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-6 flex items-center">
+          <BarChart3 className="h-5 w-5 mr-2 text-indigo-600" />
+          Applications by Job Type
+        </h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <RechartsBarChart data={data} barSize={60}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis domain={[0, 'dataMax + 2']} />
+            <Tooltip />
+            <Bar dataKey="applications" radius={[8, 8, 0, 0]}>
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Bar>
+          </RechartsBarChart>
+        </ResponsiveContainer>
+      </div>
+    )
+  }
+
+  const TimeLineChart = () => {
+    const getTimeData = () => {
+      switch(timeFilter) {
+        case 'hour':
+          return Object.entries(analytics.byHour || {}).map(([time, value]) => ({
+            time,
+            applications: value
+          }))
+        case 'month':
+          return Object.entries(analytics.byMonth || {}).map(([time, value]) => ({
+            time,
+            applications: value
+          }))
+        case 'day':
+        default:
+          return Object.entries(analytics.byDay || {}).map(([time, value]) => ({
+            time,
+            applications: value
+          }))
+      }
+    }
+
+    const getTitle = () => {
+      switch(timeFilter) {
+        case 'hour':
+          return 'Last 24 Hours'
+        case 'month':
+          return 'Last 12 Months'
+        case 'day':
+        default:
+          return 'Last 30 Days'
+      }
+    }
+
+    const data = getTimeData()
+
+    return (
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-medium text-gray-900 flex items-center">
+            <Calendar className="h-5 w-5 mr-2 text-indigo-600" />
+            Applications by Time ({getTitle()})
+          </h3>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setTimeFilter('hour')}
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                timeFilter === 'hour'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Hour
+            </button>
+            <button
+              onClick={() => setTimeFilter('day')}
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                timeFilter === 'day'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Day
+            </button>
+            <button
+              onClick={() => setTimeFilter('month')}
+              className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                timeFilter === 'month'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Month
+            </button>
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="time" 
+              tick={{ fontSize: 10 }}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+            />
+            <YAxis domain={[0, 'dataMax + 2']} />
+            <Tooltip />
+            <Line 
+              type="monotone" 
+              dataKey="applications" 
+              stroke="#10B981" 
+              strokeWidth={2}
+              dot={{ fill: '#10B981', r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     )
   }
@@ -185,7 +433,7 @@ export default function AnalyticsDashboard() {
       { name: 'Shortlisted', value: analytics.shortlisted, color: '#10B981' },
       { name: 'Accepted', value: analytics.accepted, color: '#8B5CF6' },
       { name: 'Rejected', value: analytics.rejected, color: '#EF4444' }
-    ]
+    ].filter(item => item.value > 0) // Only show statuses with values > 0
 
     const total = statusData.reduce((sum, item) => sum + item.value, 0)
 
@@ -195,53 +443,25 @@ export default function AnalyticsDashboard() {
           <PieChart className="h-5 w-5 mr-2 text-indigo-600" />
           Application Status Breakdown
         </h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pie Chart */}
-          <div className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={300}>
-              <RechartsPieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </div>
-          
-          {/* Legend with counts */}
-          <div className="flex flex-col justify-center space-y-3">
-            {statusData.map((status) => {
-              const percentage = total > 0 ? ((status.value / total) * 100).toFixed(1) : 0
-              return (
-                <div key={status.name} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-4 h-4 rounded" 
-                      style={{ backgroundColor: status.color }}
-                    />
-                    <span className="text-sm font-medium text-gray-700">{status.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-600">{status.value} apps</span>
-                    <span className="text-sm font-semibold text-gray-900 w-12 text-right">{percentage}%</span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <RechartsPieChart>
+            <Pie
+              data={statusData}
+              cx="50%"
+              cy="50%"
+              labelLine={true}
+              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+              outerRadius={100}
+              fill="#8884d8"
+              dataKey="value"
+            >
+              {statusData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </RechartsPieChart>
+        </ResponsiveContainer>
       </div>
     )
   }
@@ -267,7 +487,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Key Metrics - Same 5 boxes as Admin Dashboard */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5 mb-8">
           <StatCard
             icon={Users}
             title="Total Applications"
@@ -277,9 +497,9 @@ export default function AnalyticsDashboard() {
           />
           <StatCard
             icon={Users}
-            title="Total Users"
-            value={analytics.totalUsers || 0}
-            subtitle="Registered users"
+            title="Total Applicants"
+            value={analytics.totalApplicants || 0}
+            subtitle="Registered applicants"
             color="green"
           />
           <StatCard
@@ -305,29 +525,17 @@ export default function AnalyticsDashboard() {
           />
         </div>
 
-        {/* Status Breakdown */}
-        <StatusBreakdown />
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <BarChart
-            data={analytics.byDepartment}
-            title="Applications by Department"
-            color="bg-indigo-500"
-          />
-          <BarChart
-            data={analytics.byJobType}
-            title="Applications by Job Type"
-            color="bg-indigo-500"
-          />
+        {/* Status Breakdown and Department Charts - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <StatusBreakdown />
+          <DepartmentPieChart />
         </div>
 
-        {/* Monthly Trend */}
-        <BarChart
-          data={analytics.byMonth}
-          title="Applications by Month"
-          color="bg-indigo-500"
-        />
+        {/* Job Type and Daily Trend - Side by Side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <JobTypeLineChart />
+          <TimeLineChart />
+        </div>
 
         {/* Additional Insights */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
