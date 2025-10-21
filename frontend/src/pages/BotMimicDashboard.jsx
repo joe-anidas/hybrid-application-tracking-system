@@ -293,7 +293,7 @@ const BotMimicDashboard = () => {
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 <FileText className="h-4 w-4 inline mr-2" />
-                Applications ({applications.length})
+                Applications ({applications?.length || 0})
               </button>
               <button
                 onClick={() => setActiveTab('activity')}
@@ -304,7 +304,7 @@ const BotMimicDashboard = () => {
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 <Activity className="h-4 w-4 inline mr-2" />
-                Activity Log ({activityLog.length})
+                Activity Log ({activityLog?.length || 0})
               </button>
             </nav>
           </div>

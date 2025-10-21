@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'https://hybrid-application-tracking-system-lydq.onrender.com/api'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api'
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('token')
