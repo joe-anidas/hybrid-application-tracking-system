@@ -27,7 +27,7 @@ const demoJobs = [
     title: 'Frontend React Developer',
     company: 'Digital Innovations Inc',
     department: 'Product Development',
-    location: 'Hyderabad, India',
+    location: 'Chennai, India',
     type: 'full-time',
     jobType: 'technical',
     level: 'mid',
@@ -44,7 +44,7 @@ const demoJobs = [
     title: 'DevOps Engineer',
     company: 'CloudScale Systems',
     department: 'Infrastructure',
-    location: 'Pune, India',
+    location: 'Kolkata, India',
     type: 'full-time',
     jobType: 'technical',
     level: 'mid',
@@ -195,7 +195,7 @@ const demoProfiles = {
     fullName: 'Sarah Wilson',
     email: 'sarah.wilson@demo.com',
     phone: '+91 98765 43211',
-    location: 'Hyderabad, Telangana, India',
+    location: 'Chennai, Tamil Nadu, India',
     summary: 'Creative Frontend Developer specializing in React and modern JavaScript. 4 years of experience building beautiful, responsive user interfaces.',
     education: [
       {
@@ -225,12 +225,12 @@ const demoProfiles = {
     fullName: 'Michael Chen',
     email: 'michael.chen@demo.com',
     phone: '+91 98765 43212',
-    location: 'Pune, Maharashtra, India',
+    location: 'Kolkata, West Bengal, India',
     summary: 'Experienced DevOps Engineer with expertise in cloud infrastructure and automation. Passionate about improving deployment pipelines and system reliability.',
     education: [
       {
         degree: 'Master of Computer Applications',
-        institution: 'Pune University',
+        institution: 'Jadavpur University',
         startDate: '2017-07',
         endDate: '2020-06',
         grade: '8.7 CGPA'
@@ -456,23 +456,23 @@ export const createDemoApplications = async () => {
     const applicationsToCreate = [
       // John Doe - Technical roles (will be processed by Bot Mimic)
       { userEmail: 'applicant@demo.com', jobTitle: 'Senior Full Stack Developer', status: 'submitted' },
-      { userEmail: 'applicant@demo.com', jobTitle: 'DevOps Engineer', status: 'under-review' },
+      { userEmail: 'applicant@demo.com', jobTitle: 'DevOps Engineer', status: 'submitted' },
       
       // Sarah Wilson - Technical roles
       { userEmail: 'sarah.wilson@demo.com', jobTitle: 'Frontend React Developer', status: 'submitted' },
-      { userEmail: 'sarah.wilson@demo.com', jobTitle: 'Senior Full Stack Developer', status: 'shortlisted' },
+      { userEmail: 'sarah.wilson@demo.com', jobTitle: 'Senior Full Stack Developer', status: 'submitted' },
       
       // Michael Chen - Technical roles
       { userEmail: 'michael.chen@demo.com', jobTitle: 'DevOps Engineer', status: 'submitted' },
-      { userEmail: 'michael.chen@demo.com', jobTitle: 'Python Backend Developer', status: 'under-review' },
+      { userEmail: 'michael.chen@demo.com', jobTitle: 'Python Backend Developer', status: 'submitted' },
       
       // Emily Rodriguez - Non-technical roles (will be managed by Admin)
       { userEmail: 'emily.rodriguez@demo.com', jobTitle: 'HR Manager', status: 'submitted' },
-      { userEmail: 'emily.rodriguez@demo.com', jobTitle: 'Business Analyst', status: 'under-review' },
+      { userEmail: 'emily.rodriguez@demo.com', jobTitle: 'Business Analyst', status: 'submitted' },
       
       // David Kumar - Non-technical roles
       { userEmail: 'david.kumar@demo.com', jobTitle: 'Marketing Manager', status: 'submitted' },
-      { userEmail: 'david.kumar@demo.com', jobTitle: 'Business Analyst', status: 'shortlisted' }
+      { userEmail: 'david.kumar@demo.com', jobTitle: 'Business Analyst', status: 'submitted' }
     ]
 
     for (const appData of applicationsToCreate) {

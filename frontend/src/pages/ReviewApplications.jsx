@@ -82,6 +82,8 @@ export default function ReviewApplications() {
   const [updatingStatus, setUpdatingStatus] = useState(null)
   const [commentModal, setCommentModal] = useState({ show: false, applicationId: null, currentComment: '' })
   const [savingComment, setSavingComment] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 50
 
   // Helper function to safely format dates
   const formatDate = (date) => {
@@ -166,6 +168,18 @@ export default function ReviewApplications() {
     }
 
     setFilteredApplications(filtered)
+    setCurrentPage(1) // Reset to first page when filters change
+  }
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredApplications.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedApplications = filteredApplications.slice(startIndex, endIndex)
+
+  const goToPage = (page) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleStatusChange = async (applicationId, newStatus) => {
@@ -318,7 +332,8 @@ export default function ReviewApplications() {
             </div>
           </div>
           <div className="mt-4 text-sm text-gray-600">
-            Showing {filteredApplications.length} of {applications.length} applications
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredApplications.length)} of {filteredApplications.length} applications
+            {filteredApplications.length !== applications.length && ` (filtered from ${applications.length} total)`}
           </div>
         </div>
 
@@ -362,7 +377,7 @@ export default function ReviewApplications() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredApplications.map((application) => (
+                  {paginatedApplications.map((application) => (
                     <tr key={application._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
@@ -439,6 +454,78 @@ export default function ReviewApplications() {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {filteredApplications.length > itemsPerPage && (
+          <div className="bg-white shadow rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => goToPage(1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  First
+                </button>
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+                
+                {/* Page Numbers */}
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum
+                    if (totalPages <= 5) {
+                      pageNum = i + 1
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i
+                    } else {
+                      pageNum = currentPage - 2 + i
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => goToPage(pageNum)}
+                        className={`px-3 py-1.5 text-sm border rounded-md transition-colors ${
+                          currentPage === pageNum
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+                <button
+                  onClick={() => goToPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Comment Modal */}
         {commentModal.show && (

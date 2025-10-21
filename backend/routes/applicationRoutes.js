@@ -383,7 +383,7 @@ router.get('/admin/all', authenticateToken, async (req, res) => {
 
     const applications = await Application.find(filter)
       .populate('applicant', 'name email')
-      .populate('job', 'title department location company salaryRange')
+      .populate('job', 'title department location company salaryRange jobType type')
       .populate('profile')
       .sort({ createdAt: -1 })
 

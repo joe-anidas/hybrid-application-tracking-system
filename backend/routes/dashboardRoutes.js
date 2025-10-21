@@ -70,7 +70,7 @@ router.get('/admin', requireAuth, requireRole('Admin'), async (req, res) => {
       User.countDocuments({ role: { $in: ['Applicant', 'Admin', 'Bot Mimic'] } }),
       Job.countDocuments({ status: 'active' }),
       Application.countDocuments({ 
-        jobId: { 
+        job: { 
           $in: await Job.find({ jobType: 'non-technical' }).distinct('_id') 
         } 
       }),

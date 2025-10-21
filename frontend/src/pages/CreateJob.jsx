@@ -97,18 +97,18 @@ export default function CreateJob() {
     setFormData({
       title: 'Senior Full Stack Developer',
       department: 'Engineering',
-      location: 'San Francisco, CA / Remote',
+      location: 'Bangalore / Remote',
       type: 'full-time',
       jobType: 'technical',
       level: 'senior',
       description: 'We are looking for a talented Senior Full Stack Developer to join our growing engineering team. You will be responsible for developing and maintaining web applications using modern technologies and best practices.',
       requirements: '• 5+ years of experience in full-stack development\n• Proficiency in JavaScript, React, Node.js\n• Experience with databases (PostgreSQL, MongoDB)\n• Strong understanding of RESTful APIs\n• Experience with cloud platforms (AWS, GCP, or Azure)\n• Bachelor\'s degree in Computer Science or related field',
       responsibilities: '• Design and develop scalable web applications\n• Collaborate with cross-functional teams to define and implement features\n• Write clean, maintainable, and testable code\n• Participate in code reviews and technical discussions\n• Mentor junior developers\n• Contribute to technical architecture decisions',
-      salaryMin: '120000',
-      salaryMax: '160000',
+      salaryMin: '800000',
+      salaryMax: '1200000',
       applicationDeadline: '2025-11-20',
       skills: ['JavaScript', 'React', 'Node.js', 'PostgreSQL', 'AWS', 'TypeScript'],
-      benefits: '• Competitive salary and equity package\n• Health, dental, and vision insurance\n• 401(k) with company matching\n• Flexible work arrangements\n• Professional development budget\n• Unlimited PTO\n• Modern office with free snacks and drinks'
+      benefits: '• Competitive salary and equity package\n• Health and life insurance\n• Provident Fund and Gratuity\n• Flexible work arrangements\n• Professional development budget\n• Paid time off\n• Modern office with free snacks and drinks'
     })
   }
 

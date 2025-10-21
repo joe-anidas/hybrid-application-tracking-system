@@ -21,7 +21,7 @@ export const createDemoJobs = async () => {
       {
         title: 'Senior Full Stack Developer',
         department: 'Engineering',
-        location: 'San Francisco, CA / Remote',
+        location: 'Bangalore / Remote',
         type: 'full-time',
         jobType: 'technical',
         level: 'senior',
@@ -40,7 +40,7 @@ export const createDemoJobs = async () => {
       {
         title: 'DevOps Engineer',
         department: 'Engineering',
-        location: 'Austin, TX / Remote',
+        location: 'Chennai / Remote',
         type: 'full-time',
         jobType: 'technical',
         level: 'mid',
@@ -59,7 +59,7 @@ export const createDemoJobs = async () => {
       {
         title: 'Product Manager',
         department: 'Product',
-        location: 'New York, NY / Hybrid',
+        location: 'Mumbai / Hybrid',
         type: 'full-time',
         jobType: 'non-technical',
         level: 'mid',
@@ -78,7 +78,7 @@ export const createDemoJobs = async () => {
       {
         title: 'Marketing Specialist',
         department: 'Marketing',
-        location: 'Los Angeles, CA',
+        location: 'Delhi',
         type: 'full-time',
         jobType: 'non-technical',
         level: 'entry',
@@ -97,7 +97,7 @@ export const createDemoJobs = async () => {
       {
         title: 'Data Scientist',
         department: 'Data & Analytics',
-        location: 'Seattle, WA / Remote',
+        location: 'Kolkata / Remote',
         type: 'full-time',
         jobType: 'technical',
         level: 'senior',
@@ -116,7 +116,7 @@ export const createDemoJobs = async () => {
       {
         title: 'UX Designer',
         department: 'Design',
-        location: 'San Francisco, CA / Remote',
+        location: 'Remote',
         type: 'contract',
         jobType: 'non-technical',
         level: 'mid',

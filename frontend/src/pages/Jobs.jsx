@@ -14,7 +14,7 @@ export default function Jobs() {
     workFromHome: false,
     partTime: false,
     salaryRange: [0, 50], // in LPA
-    minExperience: 0, // minimum years only
+    level: '', // experience level: entry, mid, senior, lead, executive
     status: 'active'
   })
   const [searchTerm, setSearchTerm] = useState('')
@@ -60,10 +60,9 @@ export default function Jobs() {
     const jobSalaryInLPA = job.salaryMin ? job.salaryMin / 100000 : 0
     const matchesSalary = jobSalaryInLPA >= filters.salaryRange[0]
     
-    const jobMinExperience = job.experienceMin !== undefined ? job.experienceMin : 0
-    const matchesExperience = jobMinExperience >= filters.minExperience
+    const matchesLevel = !filters.level || job.level === filters.level
     
-    return matchesSearch && matchesWorkFromHome && matchesPartTime && matchesSalary && matchesExperience
+    return matchesSearch && matchesWorkFromHome && matchesPartTime && matchesSalary && matchesLevel
   })
 
   const formatSalary = (min, max) => {
@@ -217,23 +216,22 @@ export default function Jobs() {
                 </div>
               </div>
 
-              {/* Experience Filter */}
+              {/* Experience Level Filter */}
               <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Minimum Experience: {filters.minExperience} years
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="15"
-                  step="1"
-                  value={filters.minExperience}
-                  onChange={(e) => handleFilterChange('minExperience', parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>0 years</span>
-                  <span>15+ years</span>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium text-gray-700 w-24">Level</label>
+                  <select
+                    value={filters.level}
+                    onChange={(e) => handleFilterChange('level', e.target.value)}
+                    className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  >
+                    <option value="">All Levels</option>
+                    <option value="entry">Entry Level</option>
+                    <option value="mid">Mid Level</option>
+                    <option value="senior">Senior Level</option>
+                    <option value="lead">Lead</option>
+                    <option value="executive">Executive</option>
+                  </select>
                 </div>
               </div>
             </div>
