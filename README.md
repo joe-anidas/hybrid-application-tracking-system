@@ -390,9 +390,9 @@ This creates:
 **Demo Login Credentials**:
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@demo.com | admin123 |
-| Bot Mimic | bot@demo.com | bot123 |
-| Applicant | applicant@demo.com | applicant123 |
+| Admin | admin@demo.com | Admin@Demo2025!Secure |
+| Bot Mimic | bot@demo.com | BotMimic@Demo2025!Auto |
+| Applicant | applicant@demo.com | Applicant@Demo2025!Job |
 
 ## 📊 API Endpoints
 

@@ -45,13 +45,13 @@ export default function Login() {
   }
 
   const demoUsers = [
-    { role: 'Admin', name: 'Admin User', email: 'admin@demo.com', password: 'admin123', badge: 'Admin' },
-    { role: 'Bot Mimic', name: 'Bot Mimic User', email: 'bot@demo.com', password: 'bot123', badge: 'Automation' },
-    { role: 'Applicant', name: 'John Doe', email: 'applicant@demo.com', password: 'applicant123', badge: 'Full Stack Dev' },
-    { role: 'Applicant', name: 'Sarah Wilson', email: 'sarah.wilson@demo.com', password: 'applicant123', badge: 'Frontend Dev' },
-    { role: 'Applicant', name: 'Michael Chen', email: 'michael.chen@demo.com', password: 'applicant123', badge: 'DevOps' },
-    { role: 'Applicant', name: 'Emily Rodriguez', email: 'emily.rodriguez@demo.com', password: 'applicant123', badge: 'HR Manager' },
-    { role: 'Applicant', name: 'David Kumar', email: 'david.kumar@demo.com', password: 'applicant123', badge: 'Marketing' }
+    { role: 'Admin', name: 'Admin User', email: 'admin@demo.com', password: 'Admin@Demo2025!Secure', badge: 'Admin' },
+    { role: 'Bot Mimic', name: 'Bot Mimic User', email: 'bot@demo.com', password: 'BotMimic@Demo2025!Auto', badge: 'Automation' },
+    { role: 'Applicant', name: 'John Doe', email: 'applicant@demo.com', password: 'Applicant@Demo2025!Job', badge: 'Full Stack Dev' },
+    { role: 'Applicant', name: 'Sarah Wilson', email: 'sarah.wilson@demo.com', password: 'Sarah@Wilson2025!Dev', badge: 'Frontend Dev' },
+    { role: 'Applicant', name: 'Michael Chen', email: 'michael.chen@demo.com', password: 'Michael@Chen2025!Ops', badge: 'DevOps' },
+    { role: 'Applicant', name: 'Emily Rodriguez', email: 'emily.rodriguez@demo.com', password: 'Emily@Rodriguez2025!HR', badge: 'HR Manager' },
+    { role: 'Applicant', name: 'David Kumar', email: 'david.kumar@demo.com', password: 'David@Kumar2025!Mkt', badge: 'Marketing' }
   ]
 
   const fillDemoCredentials = (demoUser) => {

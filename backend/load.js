@@ -18,7 +18,7 @@ const loadDemoData = async () => {
 
     // Connect to MongoDB
     console.log('📡 Connecting to MongoDB...')
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/hybrid-ats')
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ats')
     console.log('✅ MongoDB connected\n')
 
     // Seed all demo data

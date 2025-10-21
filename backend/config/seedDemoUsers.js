@@ -5,43 +5,43 @@ const demoUsers = [
   {
     name: 'Admin User',
     email: 'admin@demo.com',
-    password: 'admin123',
+    password: 'Admin@Demo2025!Secure',
     role: 'Admin'
   },
   {
     name: 'Bot Mimic User',
     email: 'bot@demo.com',
-    password: 'bot123',
+    password: 'BotMimic@Demo2025!Auto',
     role: 'Bot Mimic'
   },
   {
     name: 'John Doe',
     email: 'applicant@demo.com',
-    password: 'applicant123',
+    password: 'Applicant@Demo2025!Job',
     role: 'Applicant'
   },
   {
     name: 'Sarah Wilson',
     email: 'sarah.wilson@demo.com',
-    password: 'applicant123',
+    password: 'Sarah@Wilson2025!Dev',
     role: 'Applicant'
   },
   {
     name: 'Michael Chen',
     email: 'michael.chen@demo.com',
-    password: 'applicant123',
+    password: 'Michael@Chen2025!Ops',
     role: 'Applicant'
   },
   {
     name: 'Emily Rodriguez',
     email: 'emily.rodriguez@demo.com',
-    password: 'applicant123',
+    password: 'Emily@Rodriguez2025!HR',
     role: 'Applicant'
   },
   {
     name: 'David Kumar',
     email: 'david.kumar@demo.com',
-    password: 'applicant123',
+    password: 'David@Kumar2025!Mkt',
     role: 'Applicant'
   }
 ]

@@ -49,7 +49,7 @@ app.use(auditMiddleware)
 
 // ✅ MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI || "mongodb://localhost:27017/hybrid-ats")
+  .connect(process.env.MONGO_URI || "mongodb://localhost:27017/ats")
   .then(() => {
     console.log("✅ MongoDB connected")
   })
@@ -104,7 +104,7 @@ const PORT = process.env.PORT || 3000;
 
 // Health check / root route
 app.get("/", (_req, res) => {
-  res.json({ status: "ok", service: "hybrid-ats-backend" });
+  res.json({ status: "ok", service: "ats-backend" });
 });
 
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
