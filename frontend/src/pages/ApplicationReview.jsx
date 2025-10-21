@@ -165,6 +165,66 @@ export default function ApplicationReview() {
           </div>
         </div>
 
+        {/* Status History Timeline */}
+        {application.statusHistory && application.statusHistory.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+              <svg className="h-5 w-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Application Status History
+            </h3>
+            <div className="relative">
+              {/* Vertical Timeline Line */}
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
+              
+              <div className="space-y-6">
+                {[...application.statusHistory].reverse().map((history, index) => {
+                  const statusColors = {
+                    submitted: 'bg-blue-500',
+                    'under-review': 'bg-yellow-500',
+                    shortlisted: 'bg-purple-500',
+                    accepted: 'bg-green-500',
+                    rejected: 'bg-red-500'
+                  };
+                  
+                  return (
+                    <div key={index} className="relative flex items-start gap-4 pl-0">
+                      {/* Status Dot */}
+                      <div className={`relative z-10 flex-shrink-0 w-8 h-8 rounded-full ${statusColors[history.status] || 'bg-gray-500'} flex items-center justify-center`}>
+                        <div className="w-3 h-3 bg-white rounded-full" />
+                      </div>
+                      
+                      {/* Status Card */}
+                      <div className="flex-1 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-900">
+                              {history.status?.replace('-', ' ').toUpperCase()}
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {history.changedByRole === 'System' ? 'System' : `${history.changedByRole}`}
+                              {history.changedByName && history.changedByRole !== 'System' && ` • ${history.changedByName}`}
+                            </p>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(history.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        {history.comment && (
+                          <p className="text-sm text-gray-700 mt-2 bg-white rounded p-2 border border-gray-100">
+                            {history.comment}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Application Details */}
           <div className="space-y-6">

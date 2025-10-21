@@ -230,8 +230,20 @@ router.post('/process-single/:id', async (req, res) => {
 
     // Update application
     const previousStatus = application.status
+    const botComment = getRandomComment(nextStatus)
+    
+    // Record status change in history
+    application.statusHistory.push({
+      status: nextStatus,
+      changedBy: req.user.id,
+      changedByName: req.user.name || 'Bot Mimic',
+      changedByRole: 'Bot Mimic',
+      comment: botComment,
+      timestamp: new Date()
+    })
+    
     application.status = nextStatus
-    application.notes = getRandomComment(nextStatus)
+    application.notes = botComment
     application.botProcessedAt = new Date()
     
     await application.save()
@@ -320,8 +332,20 @@ router.post('/process-batch', async (req, res) => {
         }
 
         const previousStatus = application.status
+        const botComment = getRandomComment(nextStatus)
+        
+        // Record status change in history
+        application.statusHistory.push({
+          status: nextStatus,
+          changedBy: req.user.id,
+          changedByName: req.user.name || 'Bot Mimic',
+          changedByRole: 'Bot Mimic',
+          comment: botComment,
+          timestamp: new Date()
+        })
+        
         application.status = nextStatus
-        application.notes = getRandomComment(nextStatus)
+        application.notes = botComment
         application.botProcessedAt = new Date()
         
         await application.save()

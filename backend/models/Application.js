@@ -44,6 +44,27 @@ const applicationSchema = new mongoose.Schema(
       enum: ['submitted', 'under-review', 'shortlisted', 'rejected', 'withdrawn', 'accepted'],
       default: 'submitted'
     },
+    statusHistory: [{
+      status: {
+        type: String,
+        enum: ['submitted', 'under-review', 'shortlisted', 'rejected', 'withdrawn', 'accepted'],
+        required: true
+      },
+      changedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      changedByName: String,
+      changedByRole: {
+        type: String,
+        enum: ['Applicant', 'Bot Mimic', 'Admin', 'System']
+      },
+      comment: String,
+      timestamp: {
+        type: Date,
+        default: Date.now
+      }
+    }],
     appliedAt: {
       type: Date,
       default: Date.now
@@ -79,6 +100,21 @@ applicationSchema.virtual('submittedAt').get(function() {
 // Ensure virtual fields are included when converting to JSON
 applicationSchema.set('toJSON', { virtuals: true })
 applicationSchema.set('toObject', { virtuals: true })
+
+// Pre-save hook to initialize statusHistory on first save
+applicationSchema.pre('save', function(next) {
+  // If this is a new document and statusHistory is empty, add initial status
+  if (this.isNew && (!this.statusHistory || this.statusHistory.length === 0)) {
+    this.statusHistory = [{
+      status: this.status,
+      changedByName: 'System',
+      changedByRole: 'System',
+      comment: 'Application submitted',
+      timestamp: this.createdAt || new Date()
+    }]
+  }
+  next()
+})
 
 const Application = mongoose.model('Application', applicationSchema)
 export default Application

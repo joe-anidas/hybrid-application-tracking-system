@@ -444,7 +444,16 @@ router.put('/admin/:id/status', authenticateToken, async (req, res) => {
     }
 
     // Update fields if provided
-    if (status) {
+    if (status && status !== application.status) {
+      // Record status change in history
+      application.statusHistory.push({
+        status: status,
+        changedBy: req.user.id,
+        changedByName: req.user.name || req.user.email,
+        changedByRole: req.user.role,
+        comment: notes || `Status changed to ${status}`,
+        timestamp: new Date()
+      })
       application.status = status
     }
     if (notes !== undefined) {

@@ -308,6 +308,62 @@ export default function ApplicationDetailAdmin() {
           </div>
         </div>
 
+        {/* Status History Timeline */}
+        {application.statusHistory && application.statusHistory.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+              <Calendar className="h-5 w-5 mr-2 text-indigo-600" />
+              Application Timeline
+            </h3>
+            <div className="relative">
+              {/* Vertical line */}
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+              
+              {/* Timeline items */}
+              <div className="space-y-6">
+                {[...application.statusHistory].reverse().map((entry, index) => {
+                  const statusColors = {
+                    submitted: 'bg-blue-500',
+                    'under-review': 'bg-yellow-500',
+                    shortlisted: 'bg-purple-500',
+                    accepted: 'bg-green-500',
+                    rejected: 'bg-red-500',
+                    withdrawn: 'bg-gray-500'
+                  }
+                  const dotColor = statusColors[entry.status] || 'bg-gray-500'
+                  
+                  return (
+                    <div key={index} className="relative pl-10">
+                      {/* Dot */}
+                      <div className={`absolute left-2.5 top-1 w-3 h-3 ${dotColor} rounded-full border-2 border-white ring-2 ring-gray-100`}></div>
+                      
+                      {/* Content */}
+                      <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white border border-gray-200 capitalize">
+                              {entry.status.replace('-', ' ')}
+                            </span>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formatDate(entry.timestamp)} • {entry.changedByRole}
+                              {entry.changedByName && ` (${entry.changedByName})`}
+                            </p>
+                          </div>
+                        </div>
+                        {entry.comment && (
+                          <p className="text-sm text-gray-700 mt-2 italic">
+                            "{entry.comment}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Application Details */}
           <div className="space-y-6">
