@@ -1,86 +1,93 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const auditLogSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: false,
-      default: null
+      default: null,
     },
     userName: {
       type: String,
       required: true,
-      default: 'Anonymous'
+      default: "Anonymous",
     },
     userRole: {
       type: String,
       required: true,
-      enum: ['Applicant', 'Bot Mimic', 'Admin', 'System'],
-      default: 'System'
+      enum: ["Applicant", "Bot Mimic", "Admin", "System"],
+      default: "System",
     },
     action: {
       type: String,
       required: true,
       enum: [
         // Authentication
-        'USER_LOGIN',
-        'USER_LOGOUT',
-        'USER_REGISTER',
+        "USER_LOGIN",
+        "USER_LOGOUT",
+        "USER_REGISTER",
         // User Management
-        'USER_CREATED',
-        'USER_DELETED',
+        "USER_CREATED",
+        "USER_UPDATED",
+        "USER_DELETED",
+        "USER_VIEWED",
         // Job Management
-        'JOB_CREATED',
-        'JOB_UPDATED',
-        'JOB_DELETED',
-        'JOB_VIEWED',
+        "JOB_CREATED",
+        "JOB_UPDATED",
+        "JOB_DELETED",
+        "JOB_VIEWED",
         // Application Management
-        'APPLICATION_SUBMITTED',
-        'APPLICATION_STATUS_UPDATED',
-        'APPLICATION_VIEWED',
+        "APPLICATION_SUBMITTED",
+        "APPLICATION_STATUS_UPDATED",
+        "APPLICATION_UPDATED",
+        "APPLICATION_DELETED",
+        "APPLICATION_VIEWED",
         // Profile Management
-        'PROFILE_CREATED',
-        'PROFILE_UPDATED',
-        'PROFILE_VIEWED',
+        "PROFILE_CREATED",
+        "PROFILE_UPDATED",
+        "PROFILE_VIEWED",
         // Bot Mimic Activities
-        'BOT_PROCESS_SINGLE',
-        'BOT_PROCESS_BATCH',
-        'BOT_AUTO_PROCESS'
-      ]
+        "BOT_PROCESS_SINGLE",
+        "BOT_PROCESS_BATCH",
+        "BOT_AUTO_PROCESS",
+        "BOT_ACTIVITY_VIEWED",
+        // Dashboard
+        "DASHBOARD_VIEWED",
+      ],
     },
     actionDescription: {
       type: String,
-      required: true
+      required: true,
     },
     targetType: {
       type: String,
-      enum: ['User', 'Job', 'Application', 'Profile', 'Auth', 'System', null]
+      enum: ["User", "Job", "Application", "Profile", "Auth", "System", null],
     },
     targetId: {
-      type: mongoose.Schema.Types.ObjectId
+      type: mongoose.Schema.Types.ObjectId,
     },
     targetName: {
-      type: String
+      type: String,
     },
     ipAddress: {
-      type: String
+      type: String,
     },
     metadata: {
-      type: mongoose.Schema.Types.Mixed
-    }
+      type: mongoose.Schema.Types.Mixed,
+    },
   },
-  { 
+  {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-  }
-)
+    toObject: { virtuals: true },
+  },
+);
 
 // Index for faster queries
-auditLogSchema.index({ createdAt: -1 })
-auditLogSchema.index({ user: 1, createdAt: -1 })
-auditLogSchema.index({ action: 1, createdAt: -1 })
+auditLogSchema.index({ createdAt: -1 });
+auditLogSchema.index({ user: 1, createdAt: -1 });
+auditLogSchema.index({ action: 1, createdAt: -1 });
 
-const AuditLog = mongoose.model('AuditLog', auditLogSchema)
-export default AuditLog
+const AuditLog = mongoose.model("AuditLog", auditLogSchema);
+export default AuditLog;
