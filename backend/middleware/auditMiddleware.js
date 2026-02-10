@@ -1,9 +1,10 @@
 import AuditLog from "../models/AuditLog.js";
 import { getClientIp } from "../utils/auditLogger.js";
+import logger, { logAudit } from "../config/logger.js";
 
 /**
  * Middleware to automatically log all API requests
- * Creates audit logs for all authenticated API calls
+ * Creates audit logs for all authenticated API calls using Pino
  */
 export const auditMiddleware = async (req, res, next) => {
   // Store the original response methods
@@ -77,8 +78,7 @@ export const auditMiddleware = async (req, res, next) => {
       // Extract target information
       const { targetId, targetName } = extractTargetInfo(req, responseBody);
 
-      // Create audit log
-      await AuditLog.create({
+      const auditData = {
         user: user?._id || null,
         userName: user?.name || user?.email || "Anonymous",
         userRole: user?.role || "System",
@@ -97,9 +97,15 @@ export const auditMiddleware = async (req, res, next) => {
           query: req.query,
           userAgent: req.headers["user-agent"],
         },
-      });
+      };
+
+      // Log to pino for structured logging
+      logAudit(auditData);
+
+      // Create audit log in database
+      await AuditLog.create(auditData);
     } catch (error) {
-      console.error("Failed to create audit log:", error);
+      logger.error({ err: error }, "Failed to create audit log");
       // Don't throw - logging failures shouldn't break the app
     }
   });

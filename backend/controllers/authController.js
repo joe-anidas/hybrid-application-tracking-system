@@ -1,119 +1,154 @@
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import User from '../models/User.js'
-import { createAuditLog, getClientIp } from '../utils/auditLogger.js'
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import { createAuditLog, getClientIp } from "../utils/auditLogger.js";
+import { authAttemptsCounter } from "../config/prometheus.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body
+    const { name, email, password, role } = req.body;
     if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email and password are required' })
+      return res
+        .status(400)
+        .json({ error: "Name, email and password are required" });
     }
 
     // Validate role if provided
-    if (role && !['Applicant', 'Bot Mimic', 'Admin'].includes(role)) {
-      return res.status(400).json({ error: 'Invalid role. Must be Applicant, Bot Mimic, or Admin' })
+    if (role && !["Applicant", "Bot Mimic", "Admin"].includes(role)) {
+      return res
+        .status(400)
+        .json({
+          error: "Invalid role. Must be Applicant, Bot Mimic, or Admin",
+        });
     }
 
-    const existing = await User.findOne({ email })
+    const existing = await User.findOne({ email });
     if (existing) {
-      return res.status(400).json({ error: 'User with this email already exists' })
+      authAttemptsCounter.labels("failure", "register").inc();
+      return res
+        .status(400)
+        .json({ error: "User with this email already exists" });
     }
 
-    const salt = await bcrypt.genSalt(10)
-    const passwordHash = await bcrypt.hash(password, salt)
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
 
-    const user = await User.create({ 
-      name, 
-      email, 
-      passwordHash, 
-      role: role || 'Applicant' // Default to Applicant if no role specified
-    })
+    const user = await User.create({
+      name,
+      email,
+      passwordHash,
+      role: role || "Applicant", // Default to Applicant if no role specified
+    });
 
-    const token = jwt.sign({ sub: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+    const token = jwt.sign(
+      { sub: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN },
+    );
 
     // Log the registration
     await createAuditLog({
       userId: user._id,
       userName: user.name,
       userRole: user.role,
-      action: 'USER_REGISTER',
+      action: "USER_REGISTER",
       actionDescription: `${user.name} registered as ${user.role}`,
-      targetType: 'User',
+      targetType: "User",
       targetId: user._id,
       targetName: user.name,
-      ipAddress: getClientIp(req)
-    })
+      ipAddress: getClientIp(req),
+    });
+    // Track successful registration in metrics
+    authAttemptsCounter.labels("success", "register").inc();
 
     res.status(201).json({
-      message: 'Registered successfully',
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
-      token
-    })
+      message: "Registered successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      token,
+    });
   } catch (err) {
-    console.error('Register error:', err)
+    console.error("Register error:", err);
     if (err.code === 11000) {
-      return res.status(400).json({ error: 'Email already in use' })
+      return res.status(400).json({ error: "Email already in use" });
     }
-    res.status(500).json({ error: 'Internal server error' })
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};
 
 export const login = async (req, res) => {
   try {
     // Helpful debug logging in development when troubleshooting request bodies
-    if (process.env.NODE_ENV !== 'production') {
-      console.debug('Login attempt body:', req.body)
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("Login attempt body:", req.body);
     }
-    const { email, password } = req.body
+    const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' })
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: 'Invalid credentials' })
+      authAttemptsCounter.labels("failure", "login").inc();
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash)
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' })
+      authAttemptsCounter.labels("failure", "login").inc();
+      return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ sub: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+    const token = jwt.sign(
+      { sub: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN },
+    );
 
     // Log the login
     await createAuditLog({
       userId: user._id,
       userName: user.name,
       userRole: user.role,
-      action: 'USER_LOGIN',
+      action: "USER_LOGIN",
       actionDescription: `${user.name} logged in as ${user.role}`,
-      targetType: 'Auth',
-      ipAddress: getClientIp(req)
-    })
+      targetType: "Auth",
+      ipAddress: getClientIp(req),
+    });
+
+    // Track successful login in metrics
+    authAttemptsCounter.labels("success", "login").inc();
 
     res.json({
-      message: 'Logged in successfully',
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
-      token
-    })
+      message: "Logged in successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      token,
+    });
   } catch (err) {
-    console.error('Login error:', err)
-    res.status(500).json({ error: 'Internal server error' })
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};
 
 export const profile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-passwordHash')
+    const user = await User.findById(req.user._id).select("-passwordHash");
     if (!user) {
-      return res.status(404).json({ error: 'User not found' })
+      return res.status(404).json({ error: "User not found" });
     }
-    
+
     res.json({
       user: {
         id: user._id,
@@ -121,11 +156,11 @@ export const profile = async (req, res) => {
         email: user.email,
         role: user.role,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      }
-    })
+        updatedAt: user.updatedAt,
+      },
+    });
   } catch (err) {
-    console.error('Profile error:', err)
-    res.status(500).json({ error: 'Internal server error' })
+    console.error("Profile error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};

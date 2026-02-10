@@ -1,4 +1,5 @@
-import AuditLog from '../models/AuditLog.js'
+import AuditLog from "../models/AuditLog.js";
+import logger, { logAudit } from "../config/logger.js";
 
 /**
  * Create an audit log entry
@@ -24,10 +25,10 @@ export async function createAuditLog({
   targetId = null,
   targetName = null,
   ipAddress = null,
-  metadata = null
+  metadata = null,
 }) {
   try {
-    const log = new AuditLog({
+    const auditData = {
       user: userId,
       userName,
       userRole,
@@ -37,13 +38,18 @@ export async function createAuditLog({
       targetId,
       targetName,
       ipAddress,
-      metadata
-    })
-    
-    await log.save()
-    return log
+      metadata,
+    };
+
+    // Log to pino for structured logging
+    logAudit(auditData);
+
+    // Save to database
+    const log = new AuditLog(auditData);
+    await log.save();
+    return log;
   } catch (error) {
-    console.error('Failed to create audit log:', error)
+    logger.error({ err: error }, "Failed to create audit log");
     // Don't throw - logging failures shouldn't break the app
   }
 }
@@ -52,11 +58,13 @@ export async function createAuditLog({
  * Get client IP address from request
  */
 export function getClientIp(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0] || 
-         req.headers['x-real-ip'] || 
-         req.connection?.remoteAddress || 
-         req.socket?.remoteAddress ||
-         'Unknown'
+  return (
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.headers["x-real-ip"] ||
+    req.connection?.remoteAddress ||
+    req.socket?.remoteAddress ||
+    "Unknown"
+  );
 }
 
-export default { createAuditLog, getClientIp }
+export default { createAuditLog, getClientIp };
