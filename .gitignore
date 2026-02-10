@@ -54,5 +54,9 @@ tmp/
 temp/
 *.backup
 
+# Uploads (user-generated content)
+backend/uploads/resumes/*
+!backend/uploads/resumes/.gitkeep
+
 # Misc
 .prettierignore

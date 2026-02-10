@@ -1,0 +1,36 @@
+groups:
+  - name: ats-backend-alerts
+    rules:
+      - alert: AtsBackendDown
+        expr: up{job="ats-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "ATS backend is down"
+          description: "Prometheus cannot scrape the ATS backend for more than 1 minute."
+
+      - alert: AtsHighErrorRate
+        expr: |
+          sum(rate(hybrid_ats_http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum(rate(hybrid_ats_http_requests_total[5m]))
+          > 0.02
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High 5xx error rate"
+          description: "5xx responses exceed 2% over the last 5 minutes."
+
+      - alert: AtsHighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            rate(hybrid_ats_http_request_duration_seconds_bucket[5m])
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request latency (p95)"
+          description: "p95 latency exceeds 500ms over the last 5 minutes."
