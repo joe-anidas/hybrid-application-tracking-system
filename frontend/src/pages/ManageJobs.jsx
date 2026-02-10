@@ -1,137 +1,151 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Briefcase, MapPin, Clock, Banknote, Search, ChevronRight, Calendar, Plus, Trash2, Edit, AlertCircle } from 'lucide-react'
-import { getAllJobs, deleteJob } from '../services/jobs'
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Briefcase,
+  MapPin,
+  Clock,
+  Banknote,
+  Search,
+  ChevronRight,
+  Calendar,
+  Plus,
+  Trash2,
+  Edit,
+  AlertCircle,
+} from "lucide-react";
+import { getAllJobs, deleteJob } from "../services/jobs";
 
 export default function ManageJobs() {
-  const navigate = useNavigate()
-  const [jobs, setJobs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const navigate = useNavigate();
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [filters, setFilters] = useState({
-    jobType: '',
-    status: 'active'
-  })
+    jobType: "",
+    status: "active",
+  });
 
   useEffect(() => {
-    fetchJobs()
-  }, [filters.jobType]) // Only refetch when jobType changes, not status
+    fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.jobType]); // Only refetch when jobType changes, not status
 
   const fetchJobs = async () => {
     try {
-      setLoading(true)
-      setError('')
+      setLoading(true);
+      setError("");
       // Don't send status to backend, we'll filter on frontend to include expired jobs
-      const backendFilters = { 
+      const backendFilters = {
         jobType: filters.jobType,
-        limit: 1000 
-      }
-      const response = await getAllJobs(backendFilters)
-      
+        limit: 1000,
+      };
+      const response = await getAllJobs(backendFilters);
+
       if (response.success) {
-        setJobs(response.jobs)
+        setJobs(response.jobs);
       }
     } catch (err) {
-      console.error('Error fetching jobs:', err)
-      setError('Failed to load jobs. Please try again.')
+      console.error("Error fetching jobs:", err);
+      setError("Failed to load jobs. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (jobId) => {
     try {
-      await deleteJob(jobId)
-      setJobs(jobs.filter(job => job._id !== jobId))
-      setDeleteConfirm(null)
-      setError('')
+      await deleteJob(jobId);
+      setJobs(jobs.filter((job) => job._id !== jobId));
+      setDeleteConfirm(null);
+      setError("");
     } catch (err) {
-      console.error('Error deleting job:', err)
-      setError('Failed to delete job. Please try again.')
+      console.error("Error deleting job:", err);
+      setError("Failed to delete job. Please try again.");
     }
-  }
+  };
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [key]: value
-    }))
-  }
+      [key]: value,
+    }));
+  };
 
   // Check if job deadline has passed
   const isJobExpired = (job) => {
-    if (!job.applicationDeadline) return false
-    const deadline = new Date(job.applicationDeadline)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return deadline < today
-  }
+    if (!job.applicationDeadline) return false;
+    const deadline = new Date(job.applicationDeadline);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return deadline < today;
+  };
 
   // Get effective status (closed if expired, even if marked active)
   const getEffectiveStatus = (job) => {
-    if (isJobExpired(job)) return 'closed'
-    return job.status
-  }
+    if (isJobExpired(job)) return "closed";
+    return job.status;
+  };
 
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = 
+  const filteredJobs = jobs.filter((job) => {
+    const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchTerm.toLowerCase())
-    
+      job.location.toLowerCase().includes(searchTerm.toLowerCase());
+
     // Apply status filter based on effective status (includes expired jobs)
-    const effectiveStatus = getEffectiveStatus(job)
-    const matchesStatus = !filters.status || effectiveStatus === filters.status
-    
-    return matchesSearch && matchesStatus
-  })
+    const effectiveStatus = getEffectiveStatus(job);
+    const matchesStatus = !filters.status || effectiveStatus === filters.status;
+
+    return matchesSearch && matchesStatus;
+  });
 
   const formatSalary = (min, max) => {
-    if (!min && !max) return 'Competitive'
-    if (min && max) return `₹${(min / 100000).toFixed(1)} - ${(max / 100000).toFixed(1)} LPA`
-    if (min) return `From ₹${(min / 100000).toFixed(1)} LPA`
-    if (max) return `Up to ₹${(max / 100000).toFixed(1)} LPA`
-  }
+    if (!min && !max) return "Competitive";
+    if (min && max)
+      return `₹${(min / 100000).toFixed(1)} - ${(max / 100000).toFixed(1)} LPA`;
+    if (min) return `From ₹${(min / 100000).toFixed(1)} LPA`;
+    if (max) return `Up to ₹${(max / 100000).toFixed(1)} LPA`;
+  };
 
   const formatDate = (date) => {
-    if (!date) return 'Open'
-    return new Date(date).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    })
-  }
+    if (!date) return "Open";
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   const getJobTypeBadgeColor = (jobType) => {
-    return jobType === 'technical' 
-      ? 'bg-blue-100 text-blue-800' 
-      : 'bg-purple-100 text-purple-800'
-  }
+    return jobType === "technical"
+      ? "bg-blue-100 text-blue-800"
+      : "bg-purple-100 text-purple-800";
+  };
 
   const getStatusBadgeColor = (status) => {
-    return status === 'active'
-      ? 'bg-green-100 text-green-800'
-      : 'bg-gray-100 text-gray-800'
-  }
+    return status === "active"
+      ? "bg-green-100 text-green-800"
+      : "bg-gray-100 text-gray-800";
+  };
 
   const getEmploymentTypeBadge = (type) => {
     const types = {
-      'full-time': 'Full-time',
-      'part-time': 'Part-time',
-      'contract': 'Contract',
-      'internship': 'Internship'
-    }
-    return types[type] || type
-  }
+      "full-time": "Full-time",
+      "part-time": "Part-time",
+      contract: "Contract",
+      internship: "Internship",
+    };
+    return types[type] || type;
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-gray-100 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -145,10 +159,12 @@ export default function ManageJobs() {
                 <Briefcase className="h-8 w-8 mr-3 text-indigo-600" />
                 Manage Job Postings
               </h1>
-              <p className="mt-2 text-gray-600">Create, edit, and delete job postings</p>
+              <p className="mt-2 text-gray-600">
+                Create, edit, and delete job postings
+              </p>
             </div>
             <button
-              onClick={() => navigate('/admin/create-job')}
+              onClick={() => navigate("/admin/create-job")}
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <Plus className="h-5 w-5 mr-2" />
@@ -172,9 +188,11 @@ export default function ManageJobs() {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center mb-4">
             <Search className="h-5 w-5 text-gray-400 mr-2" />
-            <h2 className="text-lg font-semibold text-gray-900">Search & Filters</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Search & Filters
+            </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="md:col-span-3">
@@ -200,7 +218,7 @@ export default function ManageJobs() {
               </label>
               <select
                 value={filters.jobType}
-                onChange={(e) => handleFilterChange('jobType', e.target.value)}
+                onChange={(e) => handleFilterChange("jobType", e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white"
               >
                 <option value="">All Job Types</option>
@@ -216,7 +234,7 @@ export default function ManageJobs() {
               </label>
               <select
                 value={filters.status}
-                onChange={(e) => handleFilterChange('status', e.target.value)}
+                onChange={(e) => handleFilterChange("status", e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white"
               >
                 <option value="">All Status</option>
@@ -229,8 +247,8 @@ export default function ManageJobs() {
             <div className="flex items-end">
               <button
                 onClick={() => {
-                  setSearchTerm('')
-                  setFilters({ jobType: '', status: 'active' })
+                  setSearchTerm("");
+                  setFilters({ jobType: "", status: "active" });
                 }}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
               >
@@ -243,7 +261,8 @@ export default function ManageJobs() {
         {/* Jobs Count */}
         <div className="mb-4">
           <p className="text-sm text-gray-600">
-            Showing <span className="font-semibold">{filteredJobs.length}</span> of <span className="font-semibold">{jobs.length}</span> jobs
+            Showing <span className="font-semibold">{filteredJobs.length}</span>{" "}
+            of <span className="font-semibold">{jobs.length}</span> jobs
           </p>
         </div>
 
@@ -252,28 +271,52 @@ export default function ManageJobs() {
           {filteredJobs.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm p-12 text-center">
               <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
-              <p className="text-gray-600">Try adjusting your search or filters</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No jobs found
+              </h3>
+              <p className="text-gray-600">
+                Try adjusting your search or filters
+              </p>
             </div>
           ) : (
             filteredJobs.map((job) => (
-              <div key={job._id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div
+                key={job._id}
+                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+              >
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-start gap-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">{job.title}</h3>
-                          
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                            {job.title}
+                          </h3>
+
                           <div className="flex flex-wrap gap-2 mb-3">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getJobTypeBadgeColor(job.jobType)}`}>
-                              {job.jobType === 'technical' ? 'Technical' : 'Non-Technical'}
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getJobTypeBadgeColor(job.jobType)}`}
+                            >
+                              {job.jobType === "technical"
+                                ? "Technical"
+                                : "Non-Technical"}
                             </span>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(getEffectiveStatus(job))}`}>
-                              {getEffectiveStatus(job) === 'active' ? 'Active' : 'Closed'}
-                              {isJobExpired(job) && getEffectiveStatus(job) === 'closed' && job.status === 'active' && (
-                                <span className="ml-1" title="Deadline expired">(Expired)</span>
-                              )}
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(getEffectiveStatus(job))}`}
+                            >
+                              {getEffectiveStatus(job) === "active"
+                                ? "Active"
+                                : "Closed"}
+                              {isJobExpired(job) &&
+                                getEffectiveStatus(job) === "closed" &&
+                                job.status === "active" && (
+                                  <span
+                                    className="ml-1"
+                                    title="Deadline expired"
+                                  >
+                                    (Expired)
+                                  </span>
+                                )}
                             </span>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                               {getEmploymentTypeBadge(job.type)}
@@ -302,7 +345,9 @@ export default function ManageJobs() {
                             </div>
                           </div>
 
-                          <p className="text-sm text-gray-600 line-clamp-2">{job.description}</p>
+                          <p className="text-sm text-gray-600 line-clamp-2">
+                            {job.description}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -341,9 +386,12 @@ export default function ManageJobs() {
         {deleteConfirm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Delete</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Confirm Delete
+              </h3>
               <p className="text-gray-600 mb-6">
-                Are you sure you want to delete this job posting? This action cannot be undone.
+                Are you sure you want to delete this job posting? This action
+                cannot be undone.
               </p>
               <div className="flex justify-end gap-3">
                 <button
@@ -364,5 +412,5 @@ export default function ManageJobs() {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,93 +1,107 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Save, User, Briefcase, GraduationCap, Award, MapPin, Phone, Mail, CheckCircle, X } from 'lucide-react'
-import { useAuth } from '../contexts/AuthContext'
-import { getProfile, updateProfile } from '../services/profile'
+import React, { useState, useEffect } from "react";
+import {
+  Save,
+  User,
+  Briefcase,
+  GraduationCap,
+  Award,
+  MapPin,
+  Phone,
+  Mail,
+  CheckCircle,
+  X,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { getProfile, updateProfile } from "../services/profile";
 
 export default function ApplicantProfile() {
-  const navigate = useNavigate()
-  const { user } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
-  
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
   const [profile, setProfile] = useState({
     // Personal Info
-    fullName: '',
-    email: '',
-    phone: '',
-    location: '',
-    dateOfBirth: '',
-    
+    fullName: "",
+    email: "",
+    phone: "",
+    location: "",
+    dateOfBirth: "",
+
     // Professional Summary
-    summary: '',
-    
+    summary: "",
+
     // Education
-    education: [{
-      degree: '',
-      institution: '',
-      year: '',
-      field: ''
-    }],
-    
+    education: [
+      {
+        degree: "",
+        institution: "",
+        year: "",
+        field: "",
+      },
+    ],
+
     // Experience
-    experience: [{
-      title: '',
-      company: '',
-      startDate: '',
-      endDate: '',
-      current: false,
-      description: ''
-    }],
-    
+    experience: [
+      {
+        title: "",
+        company: "",
+        startDate: "",
+        endDate: "",
+        current: false,
+        description: "",
+      },
+    ],
+
     // Skills
     skills: [],
-    
+
     // Social Links
-    linkedin: '',
-    github: '',
-    portfolio: ''
-  })
-  
-  const [skillInput, setSkillInput] = useState('')
+    linkedin: "",
+    github: "",
+    portfolio: "",
+  });
+
+  const [skillInput, setSkillInput] = useState("");
 
   useEffect(() => {
-    fetchProfile()
-  }, [])
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchProfile = async () => {
     try {
-      setLoading(true)
-      const response = await getProfile()
+      setLoading(true);
+      const response = await getProfile();
       if (response.success && response.profile) {
         setProfile({
           ...profile,
           ...response.profile,
-          fullName: response.profile.fullName || user?.name || '',
-          email: response.profile.email || user?.email || ''
-        })
+          fullName: response.profile.fullName || user?.name || "",
+          email: response.profile.email || user?.email || "",
+        });
       } else {
         // Set default values from user
-        setProfile(prev => ({
+        setProfile((prev) => ({
           ...prev,
-          fullName: user?.name || '',
-          email: user?.email || ''
-        }))
+          fullName: user?.name || "",
+          email: user?.email || "",
+        }));
       }
     } catch (err) {
-      console.error('Error fetching profile:', err)
+      console.error("Error fetching profile:", err);
       // Set default values from user even on error
-      setProfile(prev => ({
+      setProfile((prev) => ({
         ...prev,
-        fullName: user?.name || '',
-        email: user?.email || ''
-      }))
+        fullName: user?.name || "",
+        email: user?.email || "",
+      }));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const calculateCompletionPercentage = () => {
     const fields = [
@@ -98,181 +112,207 @@ export default function ApplicantProfile() {
       profile.summary,
       profile.education[0]?.degree,
       profile.experience[0]?.title,
-      profile.skills.length > 0
-    ]
-    
-    const completed = fields.filter(field => field).length
-    return Math.round((completed / fields.length) * 100)
-  }
+      profile.skills.length > 0,
+    ];
+
+    const completed = fields.filter((field) => field).length;
+    return Math.round((completed / fields.length) * 100);
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setProfile(prev => ({
+    const { name, value } = e.target;
+    setProfile((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleEducationChange = (index, field, value) => {
-    const newEducation = [...profile.education]
-    newEducation[index][field] = value
-    setProfile(prev => ({
+    const newEducation = [...profile.education];
+    newEducation[index][field] = value;
+    setProfile((prev) => ({
       ...prev,
-      education: newEducation
-    }))
-  }
+      education: newEducation,
+    }));
+  };
 
   const addEducation = () => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
-      education: [...prev.education, { degree: '', institution: '', year: '', field: '' }]
-    }))
-  }
+      education: [
+        ...prev.education,
+        { degree: "", institution: "", year: "", field: "" },
+      ],
+    }));
+  };
 
   const removeEducation = (index) => {
     if (profile.education.length > 1) {
-      setProfile(prev => ({
+      setProfile((prev) => ({
         ...prev,
-        education: prev.education.filter((_, i) => i !== index)
-      }))
+        education: prev.education.filter((_, i) => i !== index),
+      }));
     }
-  }
+  };
 
   const handleExperienceChange = (index, field, value) => {
-    const newExperience = [...profile.experience]
-    newExperience[index][field] = value
-    setProfile(prev => ({
+    const newExperience = [...profile.experience];
+    newExperience[index][field] = value;
+    setProfile((prev) => ({
       ...prev,
-      experience: newExperience
-    }))
-  }
+      experience: newExperience,
+    }));
+  };
 
   const addExperience = () => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
-      experience: [...prev.experience, { 
-        title: '', 
-        company: '', 
-        startDate: '', 
-        endDate: '', 
-        current: false, 
-        description: '' 
-      }]
-    }))
-  }
+      experience: [
+        ...prev.experience,
+        {
+          title: "",
+          company: "",
+          startDate: "",
+          endDate: "",
+          current: false,
+          description: "",
+        },
+      ],
+    }));
+  };
 
   const removeExperience = (index) => {
     if (profile.experience.length > 1) {
-      setProfile(prev => ({
+      setProfile((prev) => ({
         ...prev,
-        experience: prev.experience.filter((_, i) => i !== index)
-      }))
+        experience: prev.experience.filter((_, i) => i !== index),
+      }));
     }
-  }
+  };
 
   const addSkill = () => {
     if (skillInput.trim() && !profile.skills.includes(skillInput.trim())) {
-      setProfile(prev => ({
+      setProfile((prev) => ({
         ...prev,
-        skills: [...prev.skills, skillInput.trim()]
-      }))
-      setSkillInput('')
+        skills: [...prev.skills, skillInput.trim()],
+      }));
+      setSkillInput("");
     }
-  }
+  };
 
   const removeSkill = (skillToRemove) => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
-      skills: prev.skills.filter(skill => skill !== skillToRemove)
-    }))
-  }
+      skills: prev.skills.filter((skill) => skill !== skillToRemove),
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setSaving(true)
-    setError('')
-    setSuccess('')
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSuccess("");
 
     try {
-      const response = await updateProfile(profile)
+      const response = await updateProfile(profile);
       if (response.success) {
-        setSuccess('Profile updated successfully!')
-        setShowSuccessPopup(true)
-        
+        setSuccess("Profile updated successfully!");
+        setShowSuccessPopup(true);
+
         // Hide popup after 3 seconds
         setTimeout(() => {
-          setShowSuccessPopup(false)
-        }, 3000)
-        
+          setShowSuccessPopup(false);
+        }, 3000);
+
         // Clear success message after fade out
         setTimeout(() => {
-          setSuccess('')
-        }, 3500)
+          setSuccess("");
+        }, 3500);
       }
     } catch (err) {
-      console.error('Error updating profile:', err)
-      setError(err.message || 'Failed to update profile. Please try again.')
+      console.error("Error updating profile:", err);
+      setError(err.message || "Failed to update profile. Please try again.");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const fillDemoData = () => {
     setProfile({
-      fullName: 'John Smith',
-      email: 'john.smith@email.com',
-      phone: '+1 (555) 123-4567',
-      location: 'San Francisco, CA',
-      dateOfBirth: '1995-05-15',
-      summary: 'Experienced software engineer with 5+ years of expertise in full-stack development. Passionate about building scalable web applications and solving complex problems. Strong background in JavaScript, React, Node.js, and cloud technologies. Proven track record of delivering high-quality software solutions in fast-paced environments.',
-      education: [{
-        degree: 'Bachelor of Science in Computer Science',
-        institution: 'University of California, Berkeley',
-        year: '2017',
-        field: 'Computer Science'
-      }, {
-        degree: 'Master of Science in Software Engineering',
-        institution: 'Stanford University',
-        year: '2019',
-        field: 'Software Engineering'
-      }],
-      experience: [{
-        title: 'Senior Software Engineer',
-        company: 'Tech Corp Inc.',
-        startDate: '2021-06',
-        endDate: '',
-        current: true,
-        description: 'Leading development of microservices architecture. Mentoring junior developers and conducting code reviews. Implementing CI/CD pipelines and improving system performance.'
-      }, {
-        title: 'Software Engineer',
-        company: 'StartUp Solutions',
-        startDate: '2019-01',
-        endDate: '2021-05',
-        current: false,
-        description: 'Developed and maintained full-stack web applications using React and Node.js. Collaborated with cross-functional teams to deliver features on time.'
-      }],
-      skills: ['JavaScript', 'React', 'Node.js', 'Python', 'TypeScript', 'MongoDB', 'PostgreSQL', 'AWS', 'Docker', 'Git'],
-      linkedin: 'https://linkedin.com/in/johnsmith',
-      github: 'https://github.com/johnsmith',
-      portfolio: 'https://johnsmith.dev'
-    })
-    setSuccess('Demo data loaded! You can now edit or save.')
-  }
+      fullName: "John Smith",
+      email: "john.smith@email.com",
+      phone: "+1 (555) 123-4567",
+      location: "San Francisco, CA",
+      dateOfBirth: "1995-05-15",
+      summary:
+        "Experienced software engineer with 5+ years of expertise in full-stack development. Passionate about building scalable web applications and solving complex problems. Strong background in JavaScript, React, Node.js, and cloud technologies. Proven track record of delivering high-quality software solutions in fast-paced environments.",
+      education: [
+        {
+          degree: "Bachelor of Science in Computer Science",
+          institution: "University of California, Berkeley",
+          year: "2017",
+          field: "Computer Science",
+        },
+        {
+          degree: "Master of Science in Software Engineering",
+          institution: "Stanford University",
+          year: "2019",
+          field: "Software Engineering",
+        },
+      ],
+      experience: [
+        {
+          title: "Senior Software Engineer",
+          company: "Tech Corp Inc.",
+          startDate: "2021-06",
+          endDate: "",
+          current: true,
+          description:
+            "Leading development of microservices architecture. Mentoring junior developers and conducting code reviews. Implementing CI/CD pipelines and improving system performance.",
+        },
+        {
+          title: "Software Engineer",
+          company: "StartUp Solutions",
+          startDate: "2019-01",
+          endDate: "2021-05",
+          current: false,
+          description:
+            "Developed and maintained full-stack web applications using React and Node.js. Collaborated with cross-functional teams to deliver features on time.",
+        },
+      ],
+      skills: [
+        "JavaScript",
+        "React",
+        "Node.js",
+        "Python",
+        "TypeScript",
+        "MongoDB",
+        "PostgreSQL",
+        "AWS",
+        "Docker",
+        "Git",
+      ],
+      linkedin: "https://linkedin.com/in/johnsmith",
+      github: "https://github.com/johnsmith",
+      portfolio: "https://johnsmith.dev",
+    });
+    setSuccess("Demo data loaded! You can now edit or save.");
+  };
 
   const skipSection = (section) => {
     // User can skip optional sections, profile will still be valid with required fields
-    setSuccess(`${section} section skipped. You can add it later.`)
-    setTimeout(() => setSuccess(''), 2000)
-  }
+    setSuccess(`${section} section skipped. You can add it later.`);
+    setTimeout(() => setSuccess(""), 2000);
+  };
 
-  const completionPercentage = calculateCompletionPercentage()
+  const completionPercentage = calculateCompletionPercentage();
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -288,8 +328,12 @@ export default function ApplicantProfile() {
                     <CheckCircle className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold text-lg">Success!</h3>
-                    <p className="text-green-50 text-sm">Profile saved successfully</p>
+                    <h3 className="text-white font-semibold text-lg">
+                      Success!
+                    </h3>
+                    <p className="text-green-50 text-sm">
+                      Profile saved successfully
+                    </p>
                   </div>
                 </div>
                 <button
@@ -325,18 +369,23 @@ export default function ApplicantProfile() {
         {/* Profile Completion Indicator */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-gray-900">Profile Completion</h2>
-            <span className="text-2xl font-bold text-indigo-600">{completionPercentage}%</span>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Profile Completion
+            </h2>
+            <span className="text-2xl font-bold text-indigo-600">
+              {completionPercentage}%
+            </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
-            <div 
+            <div
               className="bg-indigo-600 h-3 rounded-full transition-all duration-500"
               style={{ width: `${completionPercentage}%` }}
             ></div>
           </div>
           {completionPercentage < 100 && (
             <p className="text-sm text-gray-600 mt-2">
-              Complete your profile to apply for jobs. Fill in all required fields to reach 100%.
+              Complete your profile to apply for jobs. Fill in all required
+              fields to reach 100%.
             </p>
           )}
         </div>
@@ -360,7 +409,9 @@ export default function ApplicantProfile() {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center mb-4">
               <User className="h-5 w-5 text-indigo-600 mr-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Personal Information
+              </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -437,7 +488,9 @@ export default function ApplicantProfile() {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center mb-4">
               <Briefcase className="h-5 w-5 text-indigo-600 mr-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Professional Summary</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Professional Summary
+              </h3>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -460,7 +513,9 @@ export default function ApplicantProfile() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
                 <GraduationCap className="h-5 w-5 text-indigo-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">Education</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Education
+                </h3>
               </div>
               <button
                 type="button"
@@ -472,7 +527,10 @@ export default function ApplicantProfile() {
             </div>
             <div className="space-y-4">
               {profile.education.map((edu, index) => (
-                <div key={index} className="border border-gray-200 rounded-md p-4">
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-md p-4"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -482,7 +540,9 @@ export default function ApplicantProfile() {
                         type="text"
                         required
                         value={edu.degree}
-                        onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                        onChange={(e) =>
+                          handleEducationChange(index, "degree", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="e.g., Bachelor of Science"
                       />
@@ -494,7 +554,9 @@ export default function ApplicantProfile() {
                       <input
                         type="text"
                         value={edu.field}
-                        onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
+                        onChange={(e) =>
+                          handleEducationChange(index, "field", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="e.g., Computer Science"
                       />
@@ -506,7 +568,13 @@ export default function ApplicantProfile() {
                       <input
                         type="text"
                         value={edu.institution}
-                        onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
+                        onChange={(e) =>
+                          handleEducationChange(
+                            index,
+                            "institution",
+                            e.target.value,
+                          )
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="University/College name"
                       />
@@ -518,7 +586,9 @@ export default function ApplicantProfile() {
                       <input
                         type="text"
                         value={edu.year}
-                        onChange={(e) => handleEducationChange(index, 'year', e.target.value)}
+                        onChange={(e) =>
+                          handleEducationChange(index, "year", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="e.g., 2023"
                       />
@@ -543,7 +613,9 @@ export default function ApplicantProfile() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
                 <Briefcase className="h-5 w-5 text-indigo-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">Work Experience</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Work Experience
+                </h3>
               </div>
               <button
                 type="button"
@@ -555,7 +627,10 @@ export default function ApplicantProfile() {
             </div>
             <div className="space-y-4">
               {profile.experience.map((exp, index) => (
-                <div key={index} className="border border-gray-200 rounded-md p-4">
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-md p-4"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -565,7 +640,9 @@ export default function ApplicantProfile() {
                         type="text"
                         required
                         value={exp.title}
-                        onChange={(e) => handleExperienceChange(index, 'title', e.target.value)}
+                        onChange={(e) =>
+                          handleExperienceChange(index, "title", e.target.value)
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="e.g., Software Engineer"
                       />
@@ -577,7 +654,13 @@ export default function ApplicantProfile() {
                       <input
                         type="text"
                         value={exp.company}
-                        onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
+                        onChange={(e) =>
+                          handleExperienceChange(
+                            index,
+                            "company",
+                            e.target.value,
+                          )
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="Company name"
                       />
@@ -589,7 +672,13 @@ export default function ApplicantProfile() {
                       <input
                         type="month"
                         value={exp.startDate}
-                        onChange={(e) => handleExperienceChange(index, 'startDate', e.target.value)}
+                        onChange={(e) =>
+                          handleExperienceChange(
+                            index,
+                            "startDate",
+                            e.target.value,
+                          )
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
@@ -600,7 +689,13 @@ export default function ApplicantProfile() {
                       <input
                         type="month"
                         value={exp.endDate}
-                        onChange={(e) => handleExperienceChange(index, 'endDate', e.target.value)}
+                        onChange={(e) =>
+                          handleExperienceChange(
+                            index,
+                            "endDate",
+                            e.target.value,
+                          )
+                        }
                         disabled={exp.current}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
                       />
@@ -608,10 +703,18 @@ export default function ApplicantProfile() {
                         <input
                           type="checkbox"
                           checked={exp.current}
-                          onChange={(e) => handleExperienceChange(index, 'current', e.target.checked)}
+                          onChange={(e) =>
+                            handleExperienceChange(
+                              index,
+                              "current",
+                              e.target.checked,
+                            )
+                          }
                           className="mr-2"
                         />
-                        <span className="text-sm text-gray-600">Currently working here</span>
+                        <span className="text-sm text-gray-600">
+                          Currently working here
+                        </span>
                       </label>
                     </div>
                   </div>
@@ -622,7 +725,13 @@ export default function ApplicantProfile() {
                     <textarea
                       rows={3}
                       value={exp.description}
-                      onChange={(e) => handleExperienceChange(index, 'description', e.target.value)}
+                      onChange={(e) =>
+                        handleExperienceChange(
+                          index,
+                          "description",
+                          e.target.value,
+                        )
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       placeholder="Describe your responsibilities and achievements..."
                     />
@@ -652,7 +761,9 @@ export default function ApplicantProfile() {
                 type="text"
                 value={skillInput}
                 onChange={(e) => setSkillInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), addSkill())
+                }
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Add a skill (e.g., React, Python, Project Management)"
               />
@@ -686,10 +797,12 @@ export default function ApplicantProfile() {
           {/* Social Links */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Social Links (Optional)</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Social Links (Optional)
+              </h3>
               <button
                 type="button"
-                onClick={() => skipSection('Social Links')}
+                onClick={() => skipSection("Social Links")}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
                 Skip this section
@@ -746,11 +859,11 @@ export default function ApplicantProfile() {
               className="px-8 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center"
             >
               <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save Profile'}
+              {saving ? "Saving..." : "Save Profile"}
             </button>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }

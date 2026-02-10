@@ -1,126 +1,148 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Briefcase, MapPin, Clock, Banknote, Filter, Search, ChevronRight, Calendar } from 'lucide-react'
-import { getAllJobs } from '../services/jobs'
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Briefcase,
+  MapPin,
+  Clock,
+  Banknote,
+  Filter,
+  Search,
+  ChevronRight,
+  Calendar,
+} from "lucide-react";
+import { getAllJobs } from "../services/jobs";
 
 export default function Jobs() {
-  const navigate = useNavigate()
-  const [jobs, setJobs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const navigate = useNavigate();
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filters, setFilters] = useState({
-    jobType: '',
-    department: '',
+    jobType: "",
+    department: "",
     workFromHome: false,
     partTime: false,
     salaryRange: [0, 50], // in LPA
-    level: '', // experience level: entry, mid, senior, lead, executive
-    status: 'active'
-  })
-  const [searchTerm, setSearchTerm] = useState('')
+    level: "", // experience level: entry, mid, senior, lead, executive
+    status: "active",
+  });
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchJobs()
-  }, [filters])
+    fetchJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   const fetchJobs = async () => {
     try {
-      setLoading(true)
-      setError('')
+      setLoading(true);
+      setError("");
       // Pass a high limit to get all jobs instead of default pagination
-      const response = await getAllJobs({ ...filters, limit: 1000 })
-      
+      const response = await getAllJobs({ ...filters, limit: 1000 });
+
       if (response.success) {
-        setJobs(response.jobs)
+        setJobs(response.jobs);
       }
     } catch (err) {
-      console.error('Error fetching jobs:', err)
-      setError('Failed to load jobs. Please try again.')
+      console.error("Error fetching jobs:", err);
+      setError("Failed to load jobs. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [key]: value
-    }))
-  }
+      [key]: value,
+    }));
+  };
 
   // Check if job deadline has passed
   const isJobExpired = (job) => {
-    if (!job.applicationDeadline) return false
-    const deadline = new Date(job.applicationDeadline)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return deadline < today
-  }
+    if (!job.applicationDeadline) return false;
+    const deadline = new Date(job.applicationDeadline);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return deadline < today;
+  };
 
-  const filteredJobs = jobs.filter(job => {
+  const filteredJobs = jobs.filter((job) => {
     // Hide expired or closed jobs from public view
-    if (job.status === 'closed' || isJobExpired(job)) {
-      return false
+    if (job.status === "closed" || isJobExpired(job)) {
+      return false;
     }
 
-    const matchesSearch = 
+    const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesWorkFromHome = !filters.workFromHome || job.location.toLowerCase().includes('remote') || job.location.toLowerCase().includes('work from home')
-    const matchesPartTime = !filters.partTime || job.type === 'part-time'
-    
-    const jobSalaryInLPA = job.salaryMin ? job.salaryMin / 100000 : 0
-    const matchesSalary = jobSalaryInLPA >= filters.salaryRange[0]
-    
-    const matchesLevel = !filters.level || job.level === filters.level
-    
-    return matchesSearch && matchesWorkFromHome && matchesPartTime && matchesSalary && matchesLevel
-  })
+      job.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesWorkFromHome =
+      !filters.workFromHome ||
+      job.location.toLowerCase().includes("remote") ||
+      job.location.toLowerCase().includes("work from home");
+    const matchesPartTime = !filters.partTime || job.type === "part-time";
+
+    const jobSalaryInLPA = job.salaryMin ? job.salaryMin / 100000 : 0;
+    const matchesSalary = jobSalaryInLPA >= filters.salaryRange[0];
+
+    const matchesLevel = !filters.level || job.level === filters.level;
+
+    return (
+      matchesSearch &&
+      matchesWorkFromHome &&
+      matchesPartTime &&
+      matchesSalary &&
+      matchesLevel
+    );
+  });
 
   const formatSalary = (min, max) => {
-    if (!min && !max) return 'Competitive'
-    if (min && max) return `₹${(min / 100000).toFixed(1)} - ${(max / 100000).toFixed(1)} LPA`
-    if (min) return `From ₹${(min / 100000).toFixed(1)} LPA`
-    if (max) return `Up to ₹${(max / 100000).toFixed(1)} LPA`
-  }
+    if (!min && !max) return "Competitive";
+    if (min && max)
+      return `₹${(min / 100000).toFixed(1)} - ${(max / 100000).toFixed(1)} LPA`;
+    if (min) return `From ₹${(min / 100000).toFixed(1)} LPA`;
+    if (max) return `Up to ₹${(max / 100000).toFixed(1)} LPA`;
+  };
 
   const formatDate = (date) => {
-    if (!date) return 'Open'
-    return new Date(date).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    })
-  }
+    if (!date) return "Open";
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   const getJobTypeBadgeColor = (jobType) => {
-    return jobType === 'technical' 
-      ? 'bg-blue-100 text-blue-800' 
-      : 'bg-purple-100 text-purple-800'
-  }
+    return jobType === "technical"
+      ? "bg-blue-100 text-blue-800"
+      : "bg-purple-100 text-purple-800";
+  };
 
   const getEmploymentTypeBadge = (type) => {
     const types = {
-      'full-time': 'Full-time',
-      'part-time': 'Part-time',
-      'contract': 'Contract',
-      'internship': 'Internship'
-    }
-    return types[type] || type
-  }
+      "full-time": "Full-time",
+      "part-time": "Part-time",
+      contract: "Contract",
+      internship: "Internship",
+    };
+    return types[type] || type;
+  };
 
   const handleJobClick = (jobId) => {
-    navigate(`/jobs/${jobId}`)
-  }
+    navigate(`/jobs/${jobId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Open Positions</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Open Positions
+          </h1>
           <p className="text-gray-600">
             Join our team and help build the future
           </p>
@@ -153,10 +175,14 @@ export default function Jobs() {
               {/* Job Type Filter */}
               <div className="mb-5">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-gray-700 w-24">Job Type</label>
+                  <label className="text-sm font-medium text-gray-700 w-24">
+                    Job Type
+                  </label>
                   <select
                     value={filters.jobType}
-                    onChange={(e) => handleFilterChange('jobType', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("jobType", e.target.value)
+                    }
                     className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   >
                     <option value="">All Types</option>
@@ -169,10 +195,14 @@ export default function Jobs() {
               {/* Department Filter */}
               <div className="mb-5">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-gray-700 w-24">Department</label>
+                  <label className="text-sm font-medium text-gray-700 w-24">
+                    Department
+                  </label>
                   <select
                     value={filters.department}
-                    onChange={(e) => handleFilterChange('department', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("department", e.target.value)
+                    }
                     className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   >
                     <option value="">All Departments</option>
@@ -187,25 +217,35 @@ export default function Jobs() {
 
               {/* Work Preferences - Checkboxes Side by Side */}
               <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Work Preferences</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Work Preferences
+                </label>
                 <div className="flex items-center gap-4">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       checked={filters.workFromHome}
-                      onChange={(e) => handleFilterChange('workFromHome', e.target.checked)}
+                      onChange={(e) =>
+                        handleFilterChange("workFromHome", e.target.checked)
+                      }
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Work from Home</span>
+                    <span className="ml-2 text-sm text-gray-700">
+                      Work from Home
+                    </span>
                   </label>
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
                       checked={filters.partTime}
-                      onChange={(e) => handleFilterChange('partTime', e.target.checked)}
+                      onChange={(e) =>
+                        handleFilterChange("partTime", e.target.checked)
+                      }
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                     />
-                    <span className="ml-2 text-sm text-gray-700">Part-time</span>
+                    <span className="ml-2 text-sm text-gray-700">
+                      Part-time
+                    </span>
                   </label>
                 </div>
               </div>
@@ -221,7 +261,12 @@ export default function Jobs() {
                   max="50"
                   step="1"
                   value={filters.salaryRange[0]}
-                  onChange={(e) => handleFilterChange('salaryRange', [parseInt(e.target.value), filters.salaryRange[1]])}
+                  onChange={(e) =>
+                    handleFilterChange("salaryRange", [
+                      parseInt(e.target.value),
+                      filters.salaryRange[1],
+                    ])
+                  }
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -233,10 +278,14 @@ export default function Jobs() {
               {/* Experience Level Filter */}
               <div className="mb-5">
                 <div className="flex items-center gap-3">
-                  <label className="text-sm font-medium text-gray-700 w-24">Level</label>
+                  <label className="text-sm font-medium text-gray-700 w-24">
+                    Level
+                  </label>
                   <select
                     value={filters.level}
-                    onChange={(e) => handleFilterChange('level', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("level", e.target.value)
+                    }
                     className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
                   >
                     <option value="">All Levels</option>
@@ -270,7 +319,8 @@ export default function Jobs() {
                 {/* Results Count at Top */}
                 <div className="mb-4">
                   <p className="text-base font-medium text-gray-700">
-                    {filteredJobs.length} position{filteredJobs.length !== 1 ? 's' : ''} found
+                    {filteredJobs.length} position
+                    {filteredJobs.length !== 1 ? "s" : ""} found
                   </p>
                 </div>
 
@@ -278,11 +328,13 @@ export default function Jobs() {
                 {filteredJobs.length === 0 ? (
                   <div className="bg-white rounded-lg shadow-sm p-12 text-center">
                     <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No jobs found
+                    </h3>
                     <p className="text-gray-600">
                       {searchTerm || filters.jobType || filters.department
-                        ? 'Try adjusting your search or filters'
-                        : 'Check back soon for new opportunities'}
+                        ? "Try adjusting your search or filters"
+                        : "Check back soon for new opportunities"}
                     </p>
                   </div>
                 ) : (
@@ -301,8 +353,12 @@ export default function Jobs() {
                                 {job.title}
                               </h3>
                               <div className="flex flex-wrap gap-2">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getJobTypeBadgeColor(job.jobType)}`}>
-                                  {job.jobType === 'technical' ? 'Technical' : 'Non-Technical'}
+                                <span
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getJobTypeBadgeColor(job.jobType)}`}
+                                >
+                                  {job.jobType === "technical"
+                                    ? "Technical"
+                                    : "Non-Technical"}
                                 </span>
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 capitalize">
                                   {job.level}
@@ -328,18 +384,21 @@ export default function Jobs() {
                           </div>
                           <div className="flex items-center">
                             <Banknote className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
-                            <span>{formatSalary(job.salaryMin, job.salaryMax)}</span>
+                            <span>
+                              {formatSalary(job.salaryMin, job.salaryMax)}
+                            </span>
                           </div>
-                          {(job.experienceMin !== undefined || job.experienceMax !== undefined) && (
+                          {(job.experienceMin !== undefined ||
+                            job.experienceMax !== undefined) && (
                             <div className="flex items-center">
                               <Calendar className="h-4 w-4 mr-2 text-gray-400 flex-shrink-0" />
                               <span>
-                                {job.experienceMin !== undefined && job.experienceMax !== undefined
-                                  ? `${job.experienceMin}-${job.experienceMax} year${job.experienceMax !== 1 ? 's' : ''}`
+                                {job.experienceMin !== undefined &&
+                                job.experienceMax !== undefined
+                                  ? `${job.experienceMin}-${job.experienceMax} year${job.experienceMax !== 1 ? "s" : ""}`
                                   : job.experienceMin !== undefined
-                                  ? `${job.experienceMin}+ year${job.experienceMin !== 1 ? 's' : ''}`
-                                  : `Up to ${job.experienceMax} year${job.experienceMax !== 1 ? 's' : ''}`
-                                }
+                                    ? `${job.experienceMin}+ year${job.experienceMin !== 1 ? "s" : ""}`
+                                    : `Up to ${job.experienceMax} year${job.experienceMax !== 1 ? "s" : ""}`}
                               </span>
                             </div>
                           )}
@@ -349,7 +408,9 @@ export default function Jobs() {
                         <div className="mb-3">
                           <p className="text-sm text-gray-600 line-clamp-2">
                             {job.description}
-                            {job.description && job.description.length > 150 && '...'}
+                            {job.description &&
+                              job.description.length > 150 &&
+                              "..."}
                           </p>
                         </div>
 
@@ -381,12 +442,15 @@ export default function Jobs() {
                             </div>
                             <div className="flex items-center">
                               <Clock className="h-3 w-3 mr-1" />
-                              <span>Apply by {formatDate(job.applicationDeadline)}</span>
+                              <span>
+                                Apply by {formatDate(job.applicationDeadline)}
+                              </span>
                             </div>
                           </div>
                           {job.applicants > 0 && (
                             <div className="flex-shrink-0 ml-2">
-                              {job.applicants} applicant{job.applicants !== 1 ? 's' : ''}
+                              {job.applicants} applicant
+                              {job.applicants !== 1 ? "s" : ""}
                             </div>
                           )}
                         </div>
@@ -400,5 +464,5 @@ export default function Jobs() {
         </div>
       </div>
     </div>
-  )
+  );
 }

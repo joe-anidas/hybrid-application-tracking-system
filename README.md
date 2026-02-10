@@ -7,6 +7,7 @@ A comprehensive full-stack application tracking system that handles both automat
 ---
 
 ## 📋 Table of Contents
+
 - [Features](#-features-available)
 - [Technology Stack](#-technology-stack)
 - [Architecture](#-architecture)
@@ -21,6 +22,7 @@ A comprehensive full-stack application tracking system that handles both automat
 ## 🎯 Project Overview
 
 This system demonstrates a hybrid workflow where:
+
 - **Technical role applications** use automated tracking via Bot Mimic (simulating API-based systems)
 - **Non-technical role applications** require manual processing by Admin users
 - **Complete traceability** is maintained for all actions with timestamps and user attribution
@@ -30,6 +32,7 @@ This system demonstrates a hybrid workflow where:
 ## 🚀 Features Available
 
 ### 1. **Role-Based Authentication & Authorization**
+
 - **JWT-based Authentication** - Secure login with username/email and password
 - **Three User Roles:**
   - **Applicant** - Submit and track job applications
@@ -40,6 +43,7 @@ This system demonstrates a hybrid workflow where:
 - **Secure Password Storage** - bcryptjs password hashing
 
 ### 2. **Job Management System**
+
 - **Create Job Postings** (Admin only):
   - Full job details: title, department, location, description
   - Technical vs Non-technical role classification
@@ -60,6 +64,7 @@ This system demonstrates a hybrid workflow where:
 - **Update & Delete Jobs** (Admin only)
 
 ### 3. **Application Submission & Tracking**
+
 - **Apply to Jobs**:
   - Resume upload (PDF, DOC, DOCX - max 5MB)
   - Cover letter submission
@@ -82,6 +87,7 @@ This system demonstrates a hybrid workflow where:
   - Comments timeline
 
 ### 4. **Bot Mimic - Automated Processing**
+
 - **Automated Technical Role Processing**:
   - Simulates API-based automated workflow
   - Automatic status progression through defined stages
@@ -104,6 +110,7 @@ This system demonstrates a hybrid workflow where:
   - Daily processing counts
 
 ### 5. **Admin Dashboard & Management**
+
 - **Application Management**:
   - View all applications across all jobs
   - Filter by status, job type, and applicant
@@ -129,6 +136,7 @@ This system demonstrates a hybrid workflow where:
   - User activity tracking
 
 ### 6. **Analytics & Reporting Dashboard**
+
 - **Application Metrics**:
   - Total applications count
   - Applications by status distribution
@@ -150,6 +158,7 @@ This system demonstrates a hybrid workflow where:
   - Average applications per posting
 
 ### 7. **Complete Audit Trail & Logging**
+
 - **Activity Tracking**:
   - Every application action logged
   - User attribution (Applicant/Admin/Bot Mimic)
@@ -177,6 +186,7 @@ This system demonstrates a hybrid workflow where:
   - Activity timeline
 
 ### 8. **Applicant Profile Management**
+
 - **Complete Profile Creation**:
   - Personal information (name, email, phone)
   - Professional summary
@@ -194,6 +204,7 @@ This system demonstrates a hybrid workflow where:
   - Complete applicant information for decision-making
 
 ### 9. **Application Review System**
+
 - **Admin Review Interface**:
   - Comprehensive application details
   - Full applicant profile view
@@ -214,6 +225,7 @@ This system demonstrates a hybrid workflow where:
   - Offer details documentation
 
 ### 10. **Dashboard Features by Role**
+
 - **Applicant Dashboard**:
   - Application statistics overview
   - Recent application status updates
@@ -239,6 +251,7 @@ This system demonstrates a hybrid workflow where:
   - Activity logs
 
 ### 11. **User Management** (Admin)
+
 - **View All Users**:
   - Complete user list with roles
   - Search by name or email
@@ -253,17 +266,20 @@ This system demonstrates a hybrid workflow where:
 ## 🛠️ Technology Stack
 
 ### Backend
+
 - **Runtime**: Node.js
 - **Framework**: Express.js v5
 - **Database**: MongoDB with Mongoose ODM v8
 - **Authentication**: JWT (jsonwebtoken v9)
 - **Password Security**: bcryptjs
 - **File Upload**: Multer (resume handling)
+- **Logging**: Pino v9 + pino-http (structured logging)
 - **API Documentation**: Swagger UI + Postman Collection
 - **Security**: CORS enabled
-- **Development**: Nodemon for hot reload
+- **Development**: Nodemon for hot reload, pino-pretty for log formatting
 
 ### Frontend
+
 - **Framework**: React 19
 - **Build Tool**: Vite 7
 - **Styling**: Tailwind CSS 4 (with @tailwindcss/vite)
@@ -274,9 +290,11 @@ This system demonstrates a hybrid workflow where:
 - **Code Quality**: ESLint 9
 
 ### Development Tools
+
 - **Version Control**: Git & GitHub
 - **API Testing**: Postman Collection included
 - **API Documentation**: Swagger/OpenAPI 3.0
+- **Logging**: Structured JSON logging with Pino
 - **Deployment**: Vercel (Frontend), Vercel/Railway (Backend)
 
 ---
@@ -334,6 +352,7 @@ This system demonstrates a hybrid workflow where:
 ### Data Flow
 
 #### 1. **Applicant Workflow**
+
 ```
 User → Register/Login → Create Profile → Browse Jobs → Apply to Job → Track Status
                                                                 ↓
@@ -345,6 +364,7 @@ User → Register/Login → Create Profile → Browse Jobs → Apply to Job → 
 ```
 
 #### 2. **Bot Mimic Workflow (Automated)**
+
 ```
 Bot Login → Fetch Technical Applications → Process Each Application
                                                     ↓
@@ -358,6 +378,7 @@ Bot Login → Fetch Technical Applications → Process Each Application
 ```
 
 #### 3. **Admin Workflow (Manual)**
+
 ```
 Admin Login → View All Applications → Review Non-Technical Applications
                                                     ↓
@@ -420,17 +441,22 @@ Admin Login → View All Applications → Review Non-Technical Applications
 ## 📚 API Documentation
 
 ### **Swagger UI** (Interactive Documentation)
+
 Once the server is running, access the interactive API documentation at:
+
 ```
 https://hybrid-application-tracking-system-lydq.onrender.com/api-docs
 ```
 
 ### **Postman Collection**
+
 Import the Postman collection for testing:
+
 - **File**: `Hybrid-ATS-API.postman_collection.json`
 - **Location**: Root directory of the project
 
 #### How to Import:
+
 1. Open Postman
 2. Click "Import" button
 3. Select `Hybrid-ATS-API.postman_collection.json`
@@ -441,12 +467,14 @@ Import the Postman collection for testing:
 ### **Quick API Reference**
 
 #### Authentication
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/profile` - Get user profile (protected)
 - `POST /api/auth/logout` - Logout user (protected)
 
 #### Jobs
+
 - `GET /api/jobs/all` - Get all jobs (public)
 - `GET /api/jobs/:id` - Get job details (public)
 - `POST /api/jobs/create` - Create job (Admin only)
@@ -454,22 +482,26 @@ Import the Postman collection for testing:
 - `DELETE /api/jobs/:id` - Delete job (Admin only)
 
 #### Applications
+
 - `POST /api/applications/submit` - Submit application (Applicant only)
 - `GET /api/applications/my` - Get my applications (Applicant only)
 - `GET /api/applications/all` - Get all applications (Admin only)
 - `PUT /api/applications/:id/status` - Update status (Admin/Bot Mimic)
 
 #### Bot Mimic
+
 - `POST /api/bot-mimic/process` - Process technical applications (Bot Mimic only)
 - `GET /api/bot-mimic/stats` - Get processing statistics
 
 #### Dashboard
+
 - `GET /api/dashboard/applicant` - Applicant dashboard data
 - `GET /api/dashboard/admin` - Admin dashboard data
 - `GET /api/dashboard/bot-mimic` - Bot Mimic dashboard data
 - `GET /api/dashboard/analytics` - Analytics data (Admin only)
 
 #### Audit Logs
+
 - `GET /api/audit-logs` - Get audit logs (Admin only)
 - `GET /api/audit-logs/stats` - Get audit statistics (Admin only)
 
@@ -479,13 +511,14 @@ Import the Postman collection for testing:
 
 Use these credentials to test different user roles:
 
-| Role | Email | Password | Access Level |
-|------|-------|----------|-------------|
-| **Admin** | admin@demo.com | Admin@Demo2025!Secure | Full system access, manage all jobs and applications |
-| **Bot Mimic** | bot@demo.com | BotMimic@Demo2025!Auto | Automated processing of technical applications |
-| **Applicant** | applicant@demo.com | Applicant@Demo2025!Job | Submit and track applications |
+| Role          | Email              | Password               | Access Level                                         |
+| ------------- | ------------------ | ---------------------- | ---------------------------------------------------- |
+| **Admin**     | admin@demo.com     | Admin@Demo2025!Secure  | Full system access, manage all jobs and applications |
+| **Bot Mimic** | bot@demo.com       | BotMimic@Demo2025!Auto | Automated processing of technical applications       |
+| **Applicant** | applicant@demo.com | Applicant@Demo2025!Job | Submit and track applications                        |
 
 **Additional Applicant Accounts:**
+
 - sarah.wilson@demo.com / Sarah@Wilson2025!Dev
 - michael.chen@demo.com / Michael@Chen2025!Ops
 - emily.rodriguez@demo.com / Emily@Rodriguez2025!HR
@@ -496,6 +529,7 @@ Use these credentials to test different user roles:
 ## 🛠️ Technology Stack (Detailed)
 
 ### Backend
+
 - **Runtime**: Node.js
 - **Framework**: Express.js v5
 - **Database**: MongoDB with Mongoose ODM v8
@@ -506,6 +540,7 @@ Use these credentials to test different user roles:
 - **Development**: Nodemon for hot reload
 
 ### Frontend
+
 - **Framework**: React 19
 - **Build Tool**: Vite 7
 - **Styling**: Tailwind CSS 4 (with @tailwindcss/vite)
@@ -516,7 +551,6 @@ Use these credentials to test different user roles:
 - **Code Quality**: ESLint 9
 
 ## 📁 Project Structure
-
 
 ```
 hybrid-application-tracking-system/
@@ -598,6 +632,7 @@ hybrid-application-tracking-system/
 ## 🚦 Getting Started
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - MongoDB (local installation or MongoDB Atlas)
 - npm or yarn package manager
@@ -605,12 +640,14 @@ hybrid-application-tracking-system/
 ### Installation & Setup
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/joe-anidas/hybrid-application-tracking-system.git
 cd hybrid-application-tracking-system
 ```
 
 2. **Backend Setup**
+
 ```bash
 cd backend
 npm install
@@ -628,6 +665,7 @@ npm run dev
 ```
 
 3. **Frontend Setup** (in a new terminal)
+
 ```bash
 cd frontend
 npm install
@@ -640,12 +678,14 @@ npm run dev
 ```
 
 4. **Load Demo Data** (Optional but recommended)
+
 ```bash
 cd backend
 npm run load-data
 ```
 
 This creates:
+
 - 7 Demo Users (1 Admin, 1 Bot Mimic, 5 Applicants)
 - 8 Demo Jobs (4 Technical, 4 Non-Technical)
 - 5 Applicant Profiles
@@ -665,12 +705,14 @@ This creates:
 ## 📊 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - User login
 - `GET /api/auth/profile` - Get user profile (protected)
 - `GET /api/auth/me` - Get current user (protected)
 
 ### Jobs
+
 - `POST /api/jobs/create` - Create job posting (Admin only)
 - `GET /api/jobs/all` - Get all jobs (public)
 - `GET /api/jobs/:id` - Get job details
@@ -678,6 +720,7 @@ This creates:
 - `DELETE /api/jobs/:id` - Delete job (Admin only)
 
 ### Applications
+
 - `POST /api/applications/submit` - Submit application (Applicant only)
 - `GET /api/applications/my` - Get user's applications
 - `GET /api/applications/:id` - Get application details
@@ -686,24 +729,29 @@ This creates:
 - `POST /api/applications/:id/comments` - Add comment to application
 
 ### Bot Mimic
+
 - `POST /api/bot-mimic/process` - Process technical applications (Bot Mimic only)
 - `GET /api/bot-mimic/stats` - Get processing statistics
 
 ### Audit Logs
+
 - `GET /api/audit-logs` - Get audit logs with filters (Admin only)
 - `GET /api/audit-logs/stats` - Get audit statistics (Admin only)
 
 ### Dashboard
+
 - `GET /api/dashboard/applicant` - Applicant dashboard data
 - `GET /api/dashboard/admin` - Admin dashboard data
 - `GET /api/dashboard/bot-mimic` - Bot Mimic dashboard data
 - `GET /api/dashboard/analytics` - Analytics data (Admin only)
 
 ### User Management
+
 - `GET /api/users/all` - Get all users (Admin only)
 - `GET /api/users/:id` - Get user details (Admin only)
 
 ### Profile
+
 - `GET /api/profile/my` - Get own profile
 - `POST /api/profile/create` - Create profile
 - `PUT /api/profile/update` - Update profile
@@ -732,6 +780,7 @@ This creates:
 ## 🎯 Key Workflows
 
 ### Applicant Workflow
+
 1. Register/Login as Applicant
 2. Create/Update Profile
 3. Browse available jobs
@@ -740,6 +789,7 @@ This creates:
 6. View application history and comments
 
 ### Admin Workflow
+
 1. Login as Admin
 2. Create job postings
 3. Review incoming applications
@@ -750,6 +800,7 @@ This creates:
 8. Manage users
 
 ### Bot Mimic Workflow
+
 1. Login as Bot Mimic
 2. View technical applications queue
 3. Trigger automated processing
@@ -788,6 +839,7 @@ This creates:
 ## 🚀 Development Scripts
 
 ### Backend
+
 ```bash
 npm start          # Start production server
 npm run dev        # Start development server with nodemon
@@ -795,6 +847,7 @@ npm run load-data  # Load demo data
 ```
 
 ### Frontend
+
 ```bash
 npm run dev        # Start development server
 npm run build      # Build for production
@@ -805,6 +858,7 @@ npm run lint       # Run ESLint
 ## 📝 Environment Variables
 
 ### Backend (.env)
+
 ```env
 MONGO_URI=mongodb://localhost:27017/hybrid-ats
 JWT_SECRET=your_super_secure_secret_key
@@ -815,6 +869,7 @@ CORS_ORIGIN=https://hybrid-application-tracking-system-gold.vercel.app
 ```
 
 ### Frontend (.env)
+
 ```env
 VITE_API_BASE=https://hybrid-application-tracking-system-lydq.onrender.com/api
 ```
@@ -836,6 +891,7 @@ This project is licensed under the ISC License.
 ## 👨‍💻 Author
 
 **Joe Anidas**
+
 - GitHub: [@joe-anidas](https://github.com/joe-anidas)
 
 ## 🙏 Acknowledgments
@@ -847,4 +903,3 @@ This project is licensed under the ISC License.
 ---
 
 **Note**: This system provides complete traceability and transparency for both automated and manual application workflows, ensuring fair and accountable hiring processes across technical and non-technical roles.
-

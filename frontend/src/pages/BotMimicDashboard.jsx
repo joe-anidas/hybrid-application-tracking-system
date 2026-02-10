@@ -1,9 +1,26 @@
-import React, { useState, useEffect } from 'react'
-import { 
-  Bot, Activity, Clock, TrendingUp, Zap, Calendar, CheckCircle, 
-  Play, Pause, Settings, RefreshCw, AlertCircle, FileText,
-  BarChart3, Users, Briefcase, ArrowRight, Filter, XCircle, UserCheck
-} from 'lucide-react'
+import React, { useState, useEffect } from "react";
+import {
+  Bot,
+  Activity,
+  Clock,
+  TrendingUp,
+  Zap,
+  Calendar,
+  CheckCircle,
+  Play,
+  Pause,
+  Settings,
+  RefreshCw,
+  AlertCircle,
+  FileText,
+  BarChart3,
+  Users,
+  Briefcase,
+  ArrowRight,
+  Filter,
+  XCircle,
+  UserCheck,
+} from "lucide-react";
 import {
   getBotMimicStats,
   getTechnicalApplications,
@@ -12,19 +29,27 @@ import {
   getBotMimicActivityLog,
   getAutoProcessStatus,
   enableAutoProcess,
-  disableAutoProcess
-} from '../services/botMimic'
+  disableAutoProcess,
+} from "../services/botMimic";
 
-const StatCard = ({ icon: Icon, title, value, subtitle, color = 'indigo' }) => (
+const StatCard = ({
+  icon: _Icon,
+  title,
+  value,
+  subtitle,
+  _color = "indigo",
+}) => (
   <div className="bg-white overflow-hidden shadow rounded-lg">
     <div className="p-5">
       <div className="flex items-center">
         <div className="flex-shrink-0">
-          <Icon className={`h-6 w-6 text-${color}-600`} />
+          <_Icon className={`h-6 w-6 text-${_color}-600`} />
         </div>
         <div className="ml-5 w-0 flex-1">
           <dl>
-            <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
+            <dt className="text-sm font-medium text-gray-500 truncate">
+              {title}
+            </dt>
             <dd className="text-lg font-medium text-gray-900">{value}</dd>
             {subtitle && <dd className="text-sm text-gray-500">{subtitle}</dd>}
           </dl>
@@ -32,128 +57,131 @@ const StatCard = ({ icon: Icon, title, value, subtitle, color = 'indigo' }) => (
       </div>
     </div>
   </div>
-)
+);
 
 const STATUS_COLORS = {
-  'submitted': 'bg-blue-100 text-blue-800 border-blue-300',
-  'under-review': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  'shortlisted': 'bg-purple-100 text-purple-800 border-purple-300',
-  'rejected': 'bg-red-100 text-red-800 border-red-300',
-  'withdrawn': 'bg-gray-100 text-gray-800 border-gray-300',
-  'accepted': 'bg-green-100 text-green-800 border-green-300'
-}
+  submitted: "bg-blue-100 text-blue-800 border-blue-300",
+  "under-review": "bg-yellow-100 text-yellow-800 border-yellow-300",
+  shortlisted: "bg-purple-100 text-purple-800 border-purple-300",
+  rejected: "bg-red-100 text-red-800 border-red-300",
+  withdrawn: "bg-gray-100 text-gray-800 border-gray-300",
+  accepted: "bg-green-100 text-green-800 border-green-300",
+};
 
 const BotMimicDashboard = () => {
-  const [stats, setStats] = useState(null)
-  const [applications, setApplications] = useState([])
-  const [activityLog, setActivityLog] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [processing, setProcessing] = useState(false)
-  const [error, setError] = useState(null)
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [batchLimit, setBatchLimit] = useState(10)
-  const [autoProcessEnabled, setAutoProcessEnabled] = useState(false)
-  const [successMessage, setSuccessMessage] = useState(null)
-  const [activeTab, setActiveTab] = useState('applications')
+  const [stats, setStats] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [activityLog, setActivityLog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [batchLimit, setBatchLimit] = useState(10);
+  const [autoProcessEnabled, setAutoProcessEnabled] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [activeTab, setActiveTab] = useState("applications");
 
   // Fetch all data including auto-process status
   const fetchData = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      
-      const [statsData, appsData, logData, autoProcessData] = await Promise.all([
-        getBotMimicStats(),
-        getTechnicalApplications(statusFilter),
-        getBotMimicActivityLog(1, 50),
-        getAutoProcessStatus()
-      ])
+      setLoading(true);
+      setError(null);
 
-      setStats(statsData.stats)
-      setApplications(appsData.applications)
-      setActivityLog(logData.logs)
-      setAutoProcessEnabled(autoProcessData.enabled)
+      const [statsData, appsData, logData, autoProcessData] = await Promise.all(
+        [
+          getBotMimicStats(),
+          getTechnicalApplications(statusFilter),
+          getBotMimicActivityLog(1, 50),
+          getAutoProcessStatus(),
+        ],
+      );
+
+      setStats(statsData.stats);
+      setApplications(appsData.applications);
+      setActivityLog(logData.logs);
+      setAutoProcessEnabled(autoProcessData.enabled);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch data')
+      setError(err.response?.data?.message || "Failed to fetch data");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
-  }, [statusFilter])
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter]);
 
   // Handle single application processing
   const handleProcessSingle = async (applicationId) => {
     try {
-      setProcessing(true)
-      const response = await processSingleApplication(applicationId)
-      
-      setSuccessMessage(response.message)
-      setTimeout(() => setSuccessMessage(null), 3000)
-      
-      await fetchData()
+      setProcessing(true);
+      const response = await processSingleApplication(applicationId);
+
+      setSuccessMessage(response.message);
+      setTimeout(() => setSuccessMessage(null), 3000);
+
+      await fetchData();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to process application')
+      setError(err.response?.data?.message || "Failed to process application");
     } finally {
-      setProcessing(false)
+      setProcessing(false);
     }
-  }
+  };
 
   // Handle batch processing
   const handleBatchProcess = async () => {
     try {
-      setProcessing(true)
-      const response = await processBatchApplications(statusFilter, batchLimit)
-      
+      setProcessing(true);
+      const response = await processBatchApplications(statusFilter, batchLimit);
+
       setSuccessMessage(
-        `Batch completed: ${response.results.processed} processed, ${response.results.failed} failed, ${response.results.skipped} skipped`
-      )
-      setTimeout(() => setSuccessMessage(null), 5000)
-      
-      await fetchData()
+        `Batch completed: ${response.results.processed} processed, ${response.results.failed} failed, ${response.results.skipped} skipped`,
+      );
+      setTimeout(() => setSuccessMessage(null), 5000);
+
+      await fetchData();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to process batch')
+      setError(err.response?.data?.message || "Failed to process batch");
     } finally {
-      setProcessing(false)
+      setProcessing(false);
     }
-  }
+  };
 
   // Auto-process toggle (persists across logout/login)
   const toggleAutoProcess = async () => {
     try {
       if (autoProcessEnabled) {
         // Pause auto-processing
-        await disableAutoProcess()
-        setAutoProcessEnabled(false)
-        setSuccessMessage('Auto-processing paused')
-        setTimeout(() => setSuccessMessage(null), 3000)
+        await disableAutoProcess();
+        setAutoProcessEnabled(false);
+        setSuccessMessage("Auto-processing paused");
+        setTimeout(() => setSuccessMessage(null), 3000);
       } else {
         // Enable auto-processing
-        await enableAutoProcess()
-        setAutoProcessEnabled(true)
-        setSuccessMessage('Auto-processing enabled (30 second intervals)')
-        setTimeout(() => setSuccessMessage(null), 3000)
+        await enableAutoProcess();
+        setAutoProcessEnabled(true);
+        setSuccessMessage("Auto-processing enabled (30 second intervals)");
+        setTimeout(() => setSuccessMessage(null), 3000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to toggle auto-process')
+      setError(err.response?.data?.message || "Failed to toggle auto-process");
     }
-  }
+  };
 
   // Refresh activity log periodically (every 10 seconds)
   useEffect(() => {
     const refreshInterval = setInterval(async () => {
       try {
-        const logData = await getBotMimicActivityLog(1, 50)
-        setActivityLog(logData.logs)
+        const logData = await getBotMimicActivityLog(1, 50);
+        setActivityLog(logData.logs);
       } catch (err) {
-        console.error('Failed to refresh activity log:', err)
+        console.error("Failed to refresh activity log:", err);
       }
-    }, 10000)
+    }, 10000);
 
-    return () => clearInterval(refreshInterval)
-  }, [])
+    return () => clearInterval(refreshInterval);
+  }, []);
 
   if (loading && !stats) {
     return (
@@ -164,7 +192,7 @@ const BotMimicDashboard = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -176,7 +204,9 @@ const BotMimicDashboard = () => {
             <Bot className="h-8 w-8 text-indigo-600 mr-3" />
             Bot Mimic Dashboard
           </h1>
-          <p className="mt-2 text-gray-600">Automated processing system for technical role applications</p>
+          <p className="mt-2 text-gray-600">
+            Automated processing system for technical role applications
+          </p>
         </div>
         {successMessage && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center mb-6">
@@ -197,7 +227,9 @@ const BotMimicDashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900">Control Panel</h2>
-              <p className="text-sm text-gray-600">Manage automated processing operations</p>
+              <p className="text-sm text-gray-600">
+                Manage automated processing operations
+              </p>
             </div>
             <div className="flex items-center space-x-3">
               <button
@@ -205,15 +237,17 @@ const BotMimicDashboard = () => {
                 disabled={processing}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${processing ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${processing ? "animate-spin" : ""}`}
+                />
                 Refresh
               </button>
               <button
                 onClick={toggleAutoProcess}
                 className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
                   autoProcessEnabled
-                    ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100'
-                    : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100'
+                    ? "border-red-300 text-red-700 bg-red-50 hover:bg-red-100"
+                    : "border-green-300 text-green-700 bg-green-50 hover:bg-green-100"
                 }`}
               >
                 {autoProcessEnabled ? (
@@ -235,7 +269,8 @@ const BotMimicDashboard = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-center mt-4">
               <Zap className="h-5 w-5 text-blue-600 mr-2 animate-pulse" />
               <p className="text-sm text-blue-800">
-                Auto-processing is active. Processing up to 5 applications every 30 seconds.
+                Auto-processing is active. Processing up to 5 applications every
+                30 seconds.
               </p>
             </div>
           )}
@@ -285,22 +320,22 @@ const BotMimicDashboard = () => {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
               <button
-                onClick={() => setActiveTab('applications')}
+                onClick={() => setActiveTab("applications")}
                 className={`${
-                  activeTab === 'applications'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "applications"
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 <FileText className="h-4 w-4 inline mr-2" />
                 Applications ({applications?.length || 0})
               </button>
               <button
-                onClick={() => setActiveTab('activity')}
+                onClick={() => setActiveTab("activity")}
                 className={`${
-                  activeTab === 'activity'
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "activity"
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 <Activity className="h-4 w-4 inline mr-2" />
@@ -310,7 +345,7 @@ const BotMimicDashboard = () => {
           </div>
 
           <div className="p-6">
-            {activeTab === 'applications' ? (
+            {activeTab === "applications" ? (
               <ApplicationsTab
                 applications={applications}
                 statusFilter={statusFilter}
@@ -328,8 +363,8 @@ const BotMimicDashboard = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 // Applications Tab Component
 const ApplicationsTab = ({
@@ -340,14 +375,16 @@ const ApplicationsTab = ({
   setBatchLimit,
   processing,
   handleBatchProcess,
-  handleProcessSingle
+  handleProcessSingle,
 }) => (
   <div className="space-y-4">
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-4">
         <div className="flex items-center">
           <Filter className="h-4 w-4 text-gray-500 mr-2" />
-          <label className="text-sm font-medium text-gray-700 mr-2">Status:</label>
+          <label className="text-sm font-medium text-gray-700 mr-2">
+            Status:
+          </label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -362,7 +399,9 @@ const ApplicationsTab = ({
           </select>
         </div>
         <div className="flex items-center">
-          <label className="text-sm font-medium text-gray-700 mr-2">Batch Limit:</label>
+          <label className="text-sm font-medium text-gray-700 mr-2">
+            Batch Limit:
+          </label>
           <input
             type="number"
             value={batchLimit}
@@ -427,8 +466,12 @@ const ApplicationsTab = ({
             applications.map((app) => (
               <tr key={app._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{app.applicant.name}</div>
-                  <div className="text-sm text-gray-500">{app.applicant.email}</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {app.applicant.name}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {app.applicant.email}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{app.job.title}</div>
@@ -437,7 +480,9 @@ const ApplicationsTab = ({
                   {app.job.department}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold border ${STATUS_COLORS[app.status]}`}>
+                  <span
+                    className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold border ${STATUS_COLORS[app.status]}`}
+                  >
                     {app.status}
                   </span>
                 </td>
@@ -447,7 +492,12 @@ const ApplicationsTab = ({
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <button
                     onClick={() => handleProcessSingle(app._id)}
-                    disabled={processing || !['submitted', 'under-review', 'shortlisted'].includes(app.status)}
+                    disabled={
+                      processing ||
+                      !["submitted", "under-review", "shortlisted"].includes(
+                        app.status,
+                      )
+                    }
                     className="inline-flex items-center text-indigo-600 hover:text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ArrowRight className="h-4 w-4 mr-1" />
@@ -461,7 +511,7 @@ const ApplicationsTab = ({
       </table>
     </div>
   </div>
-)
+);
 
 // Activity Log Tab Component
 const ActivityLogTab = ({ activityLog, onRefresh }) => (
@@ -485,7 +535,10 @@ const ActivityLogTab = ({ activityLog, onRefresh }) => (
             <li key={log._id}>
               <div className="relative pb-8">
                 {logIdx !== activityLog.length - 1 && (
-                  <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
+                  <span
+                    className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                    aria-hidden="true"
+                  />
                 )}
                 <div className="relative flex space-x-3">
                   <div>
@@ -495,7 +548,9 @@ const ActivityLogTab = ({ activityLog, onRefresh }) => (
                   </div>
                   <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                     <div>
-                      <p className="text-sm text-gray-900">{log.actionDescription}</p>
+                      <p className="text-sm text-gray-900">
+                        {log.actionDescription}
+                      </p>
                       {log.metadata?.comment && (
                         <p className="mt-1 text-sm text-gray-500 italic">
                           "{log.metadata.comment}"
@@ -519,6 +574,6 @@ const ActivityLogTab = ({ activityLog, onRefresh }) => (
       </ul>
     </div>
   </div>
-)
+);
 
-export default BotMimicDashboard
+export default BotMimicDashboard;

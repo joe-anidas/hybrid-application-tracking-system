@@ -1,21 +1,31 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { FileText, CheckCircle, User, Edit, ChevronRight, Eye, ExternalLink, Users, MessageSquare } from 'lucide-react'
-import { getProfile } from '../services/profile'
-import { getMyApplications } from '../services/applications'
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FileText,
+  CheckCircle,
+  User,
+  Edit,
+  ChevronRight,
+  Eye,
+  ExternalLink,
+  Users,
+  MessageSquare,
+} from "lucide-react";
+import { getProfile } from "../services/profile";
+import { getMyApplications } from "../services/applications";
 
 // Comment Tooltip Component
 const CommentTooltip = ({ comment }) => {
-  const [showTooltip, setShowTooltip] = useState(false)
-  
+  const [showTooltip, setShowTooltip] = useState(false);
+
   if (!comment) {
-    return <span className="text-gray-400 italic text-xs">No comments</span>
+    return <span className="text-gray-400 italic text-xs">No comments</span>;
   }
 
   // Truncate to first 2 words
-  const words = comment.trim().split(/\s+/)
-  const truncated = words.slice(0, 2).join(' ')
-  const shouldTruncate = words.length > 2
+  const words = comment.trim().split(/\s+/);
+  const truncated = words.slice(0, 2).join(" ");
+  const shouldTruncate = words.length > 2;
 
   return (
     <div className="relative inline-block">
@@ -26,10 +36,11 @@ const CommentTooltip = ({ comment }) => {
       >
         <MessageSquare className="h-3 w-3 text-gray-400 flex-shrink-0" />
         <span className="text-xs text-gray-900">
-          {truncated}{shouldTruncate && '...'}
+          {truncated}
+          {shouldTruncate && "..."}
         </span>
       </div>
-      
+
       {/* Tooltip Popup */}
       {showTooltip && (
         <div className="absolute z-50 left-0 top-full mt-2 w-72 bg-gray-900 text-white text-xs rounded-lg shadow-lg p-3 animate-fadeIn">
@@ -42,55 +53,55 @@ const CommentTooltip = ({ comment }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 const STATUS_COLORS = {
-  submitted: 'bg-blue-100 text-blue-800',
-  'under-review': 'bg-yellow-100 text-yellow-800',
-  shortlisted: 'bg-purple-100 text-purple-800',
-  rejected: 'bg-red-100 text-red-800',
-  withdrawn: 'bg-gray-100 text-gray-800',
-  accepted: 'bg-green-100 text-green-800'
-}
+  submitted: "bg-blue-100 text-blue-800",
+  "under-review": "bg-yellow-100 text-yellow-800",
+  shortlisted: "bg-purple-100 text-purple-800",
+  rejected: "bg-red-100 text-red-800",
+  withdrawn: "bg-gray-100 text-gray-800",
+  accepted: "bg-green-100 text-green-800",
+};
 
 const ApplicantDashboard = () => {
-  const navigate = useNavigate()
-  const [profile, setProfile] = useState(null)
-  const [applications, setApplications] = useState([])
-  const [profileCompletion, setProfileCompletion] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [profileCompletion, setProfileCompletion] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         const [profileData, applicationsData] = await Promise.all([
           getProfile(),
-          getMyApplications()
-        ])
-        setProfile(profileData.profile)
-        setApplications(applicationsData.applications || [])
-        
+          getMyApplications(),
+        ]);
+        setProfile(profileData.profile);
+        setApplications(applicationsData.applications || []);
+
         // Calculate profile completion
         if (profileData.profile) {
-          const completion = calculateProfileCompletion(profileData.profile)
-          setProfileCompletion(completion)
+          const completion = calculateProfileCompletion(profileData.profile);
+          setProfileCompletion(completion);
         }
       } catch (err) {
-        setError(err.message)
+        setError(err.message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchDashboard()
-  }, [])
+    fetchDashboard();
+  }, []);
 
   const calculateProfileCompletion = (profile) => {
-    if (!profile) return 0
-    
+    if (!profile) return 0;
+
     const fields = [
       profile.fullName,
       profile.email,
@@ -99,29 +110,31 @@ const ApplicantDashboard = () => {
       profile.summary,
       profile.education && profile.education[0]?.degree,
       profile.experience && profile.experience[0]?.title,
-      profile.skills && profile.skills.length > 0
-    ]
-    
-    const completed = fields.filter(field => field).length
-    return Math.round((completed / fields.length) * 100)
-  }
+      profile.skills && profile.skills.length > 0,
+    ];
+
+    const completed = fields.filter((field) => field).length;
+    return Math.round((completed / fields.length) * 100);
+  };
 
   const formatDate = (date) => {
-    if (!date) return 'N/A'
+    if (!date) return "N/A";
     try {
-      return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
-    } catch (error) {
-      return 'Invalid Date'
+      return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch (_error) {
+      return "Invalid Date";
     }
-  }
+  };
 
   const getSubmissionDate = (application) => {
-    return application.submittedAt || application.createdAt || application.appliedAt
-  }
+    return (
+      application.submittedAt || application.createdAt || application.appliedAt
+    );
+  };
 
   if (loading) {
     return (
@@ -132,7 +145,7 @@ const ApplicantDashboard = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -144,10 +157,10 @@ const ApplicantDashboard = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
-  const applicantName = profile?.fullName || 'Applicant'
+  const applicantName = profile?.fullName || "Applicant";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -166,14 +179,16 @@ const ApplicantDashboard = () => {
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-sm text-gray-600">Profile Completion</div>
-                <div className="text-2xl font-bold text-indigo-600">{profileCompletion}%</div>
+                <div className="text-2xl font-bold text-indigo-600">
+                  {profileCompletion}%
+                </div>
               </div>
               <button
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate("/profile")}
                 className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors flex items-center"
               >
                 <Edit className="h-4 w-4 mr-2" />
-                {profileCompletion < 100 ? 'Complete Profile' : 'Edit Profile'}
+                {profileCompletion < 100 ? "Complete Profile" : "Edit Profile"}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </button>
             </div>
@@ -195,10 +210,14 @@ const ApplicantDashboard = () => {
           {applications.length === 0 ? (
             <div className="px-6 py-12 text-center">
               <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h4>
-              <p className="text-gray-600 mb-4">Start applying to jobs to see them here</p>
+              <h4 className="text-lg font-medium text-gray-900 mb-2">
+                No Applications Yet
+              </h4>
+              <p className="text-gray-600 mb-4">
+                Start applying to jobs to see them here
+              </p>
               <button
-                onClick={() => navigate('/jobs')}
+                onClick={() => navigate("/jobs")}
                 className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
               >
                 Browse Jobs
@@ -210,25 +229,46 @@ const ApplicantDashboard = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Position
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Department
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Applied On
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Applicants
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Status
                     </th>
-                    <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                    <th
+                      scope="col"
+                      className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24"
+                    >
                       Comments
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Actions
                     </th>
                   </tr>
@@ -240,14 +280,16 @@ const ApplicantDashboard = () => {
                         <div className="flex items-center gap-2">
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {application.job?.title || 'Unknown Position'}
+                              {application.job?.title || "Unknown Position"}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {application.job?.location || 'N/A'}
+                              {application.job?.location || "N/A"}
                             </div>
                           </div>
                           <button
-                            onClick={() => navigate(`/jobs/${application.job?._id}`)}
+                            onClick={() =>
+                              navigate(`/jobs/${application.job?._id}`)
+                            }
                             className="text-indigo-600 hover:text-indigo-900 transition-colors"
                             title="View Job Details"
                           >
@@ -256,10 +298,14 @@ const ApplicantDashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{application.job?.department || 'N/A'}</div>
+                        <div className="text-sm text-gray-900">
+                          {application.job?.department || "N/A"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{formatDate(getSubmissionDate(application))}</div>
+                        <div className="text-sm text-gray-900">
+                          {formatDate(getSubmissionDate(application))}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-1 text-sm text-gray-900">
@@ -268,8 +314,10 @@ const ApplicantDashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[application.status]}`}>
-                          {application.status?.replace('-', ' ') || 'Unknown'}
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[application.status]}`}
+                        >
+                          {application.status?.replace("-", " ") || "Unknown"}
                         </span>
                       </td>
                       <td className="px-3 py-4 whitespace-nowrap">
@@ -277,7 +325,9 @@ const ApplicantDashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
-                          onClick={() => navigate(`/applications/${application._id}`)}
+                          onClick={() =>
+                            navigate(`/applications/${application._id}`)
+                          }
                           className="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-xs font-medium"
                           title="Review Application"
                         >
@@ -294,7 +344,7 @@ const ApplicantDashboard = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ApplicantDashboard
+export default ApplicantDashboard;

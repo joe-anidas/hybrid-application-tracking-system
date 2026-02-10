@@ -1,83 +1,84 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Upload, FileText, Send, CheckCircle } from 'lucide-react'
-import { useAuth } from '../contexts/AuthContext'
-import { getJobById } from '../services/jobs'
-import { getProfile } from '../services/profile'
-import { submitApplication } from '../services/applications'
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Upload, FileText, Send, CheckCircle } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { getJobById } from "../services/jobs";
+import { getProfile } from "../services/profile";
+import { submitApplication } from "../services/applications";
 
 export default function JobApplication() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const { user } = useAuth()
-  const [job, setJob] = useState(null)
-  const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  
-  const [application, setApplication] = useState({
-    coverLetter: '',
-    whyInterested: '',
-    relevantExperience: '',
-    availableStartDate: '',
-    salaryExpectation: '',
-    resume: null
-  })
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { _user } = useAuth();
+  const [job, setJob] = useState(null);
+  const [_profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const [resumeFile, setResumeFile] = useState(null)
-  const [resumeFileName, setResumeFileName] = useState('')
+  const [application, setApplication] = useState({
+    coverLetter: "",
+    whyInterested: "",
+    relevantExperience: "",
+    availableStartDate: "",
+    salaryExpectation: "",
+    resume: null,
+  });
+
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumeFileName, setResumeFileName] = useState("");
 
   useEffect(() => {
-    fetchJobDetails()
-    fetchProfileData()
-  }, [id])
+    fetchJobDetails();
+    fetchProfileData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchJobDetails = async () => {
     try {
-      setLoading(true)
-      setError('')
-      const response = await getJobById(id)
-      
+      setLoading(true);
+      setError("");
+      const response = await getJobById(id);
+
       if (response.success) {
-        setJob(response.job)
+        setJob(response.job);
       }
     } catch (err) {
-      console.error('Error fetching job details:', err)
-      setError('Failed to load job details.')
+      console.error("Error fetching job details:", err);
+      setError("Failed to load job details.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const fetchProfileData = async () => {
     try {
-      const response = await getProfile()
+      const response = await getProfile();
       if (response.success && response.profile) {
-        setProfile(response.profile)
+        setProfile(response.profile);
         // Auto-fill relevant experience from profile
-        autoFillFromProfile(response.profile)
+        autoFillFromProfile(response.profile);
       }
     } catch (err) {
-      console.error('Error fetching profile:', err)
+      console.error("Error fetching profile:", err);
     }
-  }
+  };
 
   const autoFillFromProfile = (profileData) => {
-    if (!profileData) return
-    
+    if (!profileData) return;
+
     // Auto-fill cover letter
     let coverLetter = `Dear Hiring Manager,
 
-I am writing to express my strong interest in the ${job?.title || 'position'} role at ${job?.company || 'your company'}.`
-    
+I am writing to express my strong interest in the ${job?.title || "position"} role at ${job?.company || "your company"}.`;
+
     if (profileData.summary) {
-      coverLetter += ` ${profileData.summary}`
+      coverLetter += ` ${profileData.summary}`;
     } else {
-      coverLetter += ` With my background and experience, I am confident I would be a valuable addition to your team.`
+      coverLetter += ` With my background and experience, I am confident I would be a valuable addition to your team.`;
     }
-    
+
     coverLetter += `
 
 I am excited about the opportunity to contribute to your team and would welcome the chance to discuss how my skills align with your needs.
@@ -85,61 +86,61 @@ I am excited about the opportunity to contribute to your team and would welcome 
 Thank you for considering my application.
 
 Best regards,
-${profileData.name || ''}`
+${profileData.name || ""}`;
 
     // Auto-fill why interested
-    let whyInterested = ''
+    let whyInterested = "";
     if (job?.description) {
-      whyInterested = `I am particularly drawn to this role because it aligns with my career goals and interests. `
+      whyInterested = `I am particularly drawn to this role because it aligns with my career goals and interests. `;
     }
     if (profileData.skills && profileData.skills.length > 0) {
-      whyInterested += `My experience with ${profileData.skills.slice(0, 3).join(', ')} makes me well-suited for this position. `
+      whyInterested += `My experience with ${profileData.skills.slice(0, 3).join(", ")} makes me well-suited for this position. `;
     }
-    whyInterested += `I am eager to bring my skills and enthusiasm to your team and contribute to your organization's success.`
-    
+    whyInterested += `I am eager to bring my skills and enthusiasm to your team and contribute to your organization's success.`;
+
     // Auto-fill relevant experience from profile
-    let relevantExp = ''
+    let relevantExp = "";
     if (profileData.experience && profileData.experience.length > 0) {
-      profileData.experience.forEach((exp, index) => {
-        relevantExp += `${exp.title} at ${exp.company || 'Company'}`
+      profileData.experience.forEach((exp, _index) => {
+        relevantExp += `${exp.title} at ${exp.company || "Company"}`;
         if (exp.startDate) {
-          relevantExp += ` (${exp.startDate}`
+          relevantExp += ` (${exp.startDate}`;
           if (exp.endDate) {
-            relevantExp += ` - ${exp.endDate}`
+            relevantExp += ` - ${exp.endDate}`;
           } else {
-            relevantExp += ` - Present`
+            relevantExp += ` - Present`;
           }
-          relevantExp += `)`
+          relevantExp += `)`;
         }
-        relevantExp += `\n`
+        relevantExp += `\n`;
         if (exp.description) {
-          relevantExp += `${exp.description}\n\n`
+          relevantExp += `${exp.description}\n\n`;
         }
-      })
+      });
     }
-    
+
     // Auto-fill salary expectation based on job salary range (in LPA)
-    let salaryExpectation = ''
+    let salaryExpectation = "";
     if (job?.salaryRange?.max) {
       // Convert from stored value to LPA (divide by 100,000)
-      const maxLPA = (job.salaryRange.max / 100000).toFixed(1)
-      salaryExpectation = maxLPA
+      const maxLPA = (job.salaryRange.max / 100000).toFixed(1);
+      salaryExpectation = maxLPA;
     }
-    
-    setApplication(prev => ({
+
+    setApplication((prev) => ({
       ...prev,
       coverLetter: coverLetter,
       whyInterested: whyInterested || prev.whyInterested,
       relevantExperience: relevantExp.trim(),
-      salaryExpectation: salaryExpectation || prev.salaryExpectation
-    }))
-  }
+      salaryExpectation: salaryExpectation || prev.salaryExpectation,
+    }));
+  };
 
   const fillDemoData = () => {
     setApplication({
       coverLetter: `Dear Hiring Manager,
 
-I am writing to express my strong interest in the ${job?.title || 'position'} role at ${job?.company || 'your company'}. With my background in software development and proven track record of delivering high-quality solutions, I am confident I would be a valuable addition to your team.
+I am writing to express my strong interest in the ${job?.title || "position"} role at ${job?.company || "your company"}. With my background in software development and proven track record of delivering high-quality solutions, I am confident I would be a valuable addition to your team.
 
 Throughout my career, I have developed expertise in full-stack development, working with modern technologies and frameworks. I am particularly drawn to this opportunity because it aligns perfectly with my career goals and passion for creating innovative solutions that make a real impact.
 
@@ -157,85 +158,95 @@ Developed and maintained web applications using modern JavaScript frameworks. Pa
 
 Junior Developer at StartUp Ventures
 Built responsive web interfaces and integrated third-party APIs. Worked in an agile environment, participating in daily standups and sprint planning. Gained hands-on experience with version control, CI/CD pipelines, and cloud deployment.`,
-      availableStartDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-      salaryExpectation: job?.salaryRange?.max ? (job.salaryRange.max / 100000).toFixed(1) : '8.0'
-    })
-    setError('')
-  }
+      availableStartDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0], // 30 days from now
+      salaryExpectation: job?.salaryRange?.max
+        ? (job.salaryRange.max / 100000).toFixed(1)
+        : "8.0",
+    });
+    setError("");
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setApplication(prev => ({
+    const { name, value } = e.target;
+    setApplication((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
       // Validate file type
-      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+      const validTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
       if (!validTypes.includes(file.type)) {
-        setError('Please upload a PDF or Word document')
-        return
+        setError("Please upload a PDF or Word document");
+        return;
       }
-      
+
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB')
-        return
+        setError("File size must be less than 5MB");
+        return;
       }
-      
-      setResumeFile(file)
-      setResumeFileName(file.name)
-      setError('')
+
+      setResumeFile(file);
+      setResumeFileName(file.name);
+      setError("");
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!resumeFile) {
-      setError('Please upload your resume')
-      return
+      setError("Please upload your resume");
+      return;
     }
-    
-    setSubmitting(true)
-    setError('')
+
+    setSubmitting(true);
+    setError("");
 
     try {
-      const formData = new FormData()
-      formData.append('jobId', id)
-      formData.append('coverLetter', application.coverLetter)
-      formData.append('whyInterested', application.whyInterested)
-      formData.append('relevantExperience', application.relevantExperience)
-      formData.append('availableStartDate', application.availableStartDate)
-      formData.append('salaryExpectation', application.salaryExpectation)
-      formData.append('resume', resumeFile)
+      const formData = new FormData();
+      formData.append("jobId", id);
+      formData.append("coverLetter", application.coverLetter);
+      formData.append("whyInterested", application.whyInterested);
+      formData.append("relevantExperience", application.relevantExperience);
+      formData.append("availableStartDate", application.availableStartDate);
+      formData.append("salaryExpectation", application.salaryExpectation);
+      formData.append("resume", resumeFile);
 
-      const response = await submitApplication(formData)
-      
+      const response = await submitApplication(formData);
+
       if (response.success) {
-        setSuccess(true)
+        setSuccess(true);
         setTimeout(() => {
-          navigate('/applicant')
-        }, 3000)
+          navigate("/applicant");
+        }, 3000);
       }
     } catch (err) {
-      console.error('Error submitting application:', err)
-      setError(err.message || 'Failed to submit application. Please try again.')
+      console.error("Error submitting application:", err);
+      setError(
+        err.message || "Failed to submit application. Please try again.",
+      );
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
-    )
+    );
   }
 
   if (success) {
@@ -244,13 +255,15 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
         <div className="max-w-md w-full mx-4">
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Application Submitted!
+            </h2>
             <p className="text-gray-600 mb-6">
-              Your application for <strong>{job?.title}</strong> has been successfully submitted. 
-              We'll review it and get back to you soon.
+              Your application for <strong>{job?.title}</strong> has been
+              successfully submitted. We'll review it and get back to you soon.
             </p>
             <button
-              onClick={() => navigate('/applicant')}
+              onClick={() => navigate("/applicant")}
               className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700"
             >
               Go to Dashboard
@@ -258,7 +271,7 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!job) {
@@ -268,7 +281,7 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
           <div className="bg-red-50 border border-red-200 rounded-md p-8 text-center">
             <div className="text-red-700 text-lg mb-4">Job not found</div>
             <button
-              onClick={() => navigate('/jobs')}
+              onClick={() => navigate("/jobs")}
               className="text-indigo-600 hover:text-indigo-800"
             >
               View all jobs
@@ -276,7 +289,7 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -294,7 +307,9 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">Apply for {job.title}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Apply for {job.title}
+            </h1>
             <button
               type="button"
               onClick={fillDemoData}
@@ -322,7 +337,9 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center mb-4">
               <FileText className="h-5 w-5 text-indigo-600 mr-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Cover Letter</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Cover Letter
+              </h3>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -378,7 +395,9 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
 
           {/* Additional Details */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Additional Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -390,7 +409,7 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
                   required
                   value={application.availableStartDate}
                   onChange={handleInputChange}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
@@ -415,7 +434,9 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center mb-4">
               <Upload className="h-5 w-5 text-indigo-600 mr-2" />
-              <h3 className="text-lg font-semibold text-gray-900">Resume/CV *</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Resume/CV *
+              </h3>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -470,11 +491,11 @@ Built responsive web interfaces and integrated third-party APIs. Worked in an ag
               className="px-8 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center"
             >
               <Send className="h-4 w-4 mr-2" />
-              {submitting ? 'Submitting...' : 'Submit Application'}
+              {submitting ? "Submitting..." : "Submit Application"}
             </button>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }

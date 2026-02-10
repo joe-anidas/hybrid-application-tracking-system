@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Download,
@@ -14,139 +14,156 @@ import {
   Calendar,
   ExternalLink,
   MessageSquare,
-  Edit2
-} from 'lucide-react'
-import { getApplication as getApplicationById, updateApplicationStatus, downloadResume } from '../services/applications'
+  Edit2,
+} from "lucide-react";
+import {
+  getApplication as getApplicationById,
+  updateApplicationStatus,
+  downloadResume,
+} from "../services/applications";
 
 const STATUS_COLORS = {
-  submitted: 'bg-blue-100 text-blue-800 border border-blue-300',
-  'under-review': 'bg-yellow-100 text-yellow-800 border border-yellow-300',
-  shortlisted: 'bg-green-100 text-green-800 border border-green-300',
-  rejected: 'bg-red-100 text-red-800 border border-red-300',
-  withdrawn: 'bg-gray-100 text-gray-800 border border-gray-300',
-  accepted: 'bg-purple-100 text-purple-800 border border-purple-300'
-}
+  submitted: "bg-blue-100 text-blue-800 border border-blue-300",
+  "under-review": "bg-yellow-100 text-yellow-800 border border-yellow-300",
+  shortlisted: "bg-green-100 text-green-800 border border-green-300",
+  rejected: "bg-red-100 text-red-800 border border-red-300",
+  withdrawn: "bg-gray-100 text-gray-800 border border-gray-300",
+  accepted: "bg-purple-100 text-purple-800 border border-purple-300",
+};
 
 const STATUS_OPTIONS = [
-  'submitted',
-  'under-review',
-  'shortlisted',
-  'accepted',
-  'rejected'
-]
+  "submitted",
+  "under-review",
+  "shortlisted",
+  "accepted",
+  "rejected",
+];
 
 export default function ApplicationDetailAdmin() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const [application, setApplication] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [updatingStatus, setUpdatingStatus] = useState(false)
-  const [editingStatus, setEditingStatus] = useState(false)
-  const [commentModal, setCommentModal] = useState({ show: false, currentComment: '' })
-  const [savingComment, setSavingComment] = useState(false)
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [application, setApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [commentModal, setCommentModal] = useState({
+    show: false,
+    currentComment: "",
+  });
+  const [savingComment, setSavingComment] = useState(false);
 
   // Helper function to safely format dates
   const formatDate = (date) => {
-    if (!date) return 'N/A'
+    if (!date) return "N/A";
     try {
-      return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+      return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
     } catch (error) {
-      console.error('Error formatting date:', date, error)
-      return 'Invalid Date'
+      console.error("Error formatting date:", date, error);
+      return "Invalid Date";
     }
-  }
+  };
 
   // Get submission date from application
   const getSubmissionDate = (application) => {
-    return application.submittedAt || application.createdAt || application.appliedAt
-  }
+    return (
+      application.submittedAt || application.createdAt || application.appliedAt
+    );
+  };
 
   useEffect(() => {
-    fetchApplication()
-  }, [id])
+    fetchApplication();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const fetchApplication = async () => {
     try {
-      setLoading(true)
-      const data = await getApplicationById(id)
-      setApplication(data.application || data)
-      setError(null)
+      setLoading(true);
+      const data = await getApplicationById(id);
+      setApplication(data.application || data);
+      setError(null);
     } catch (err) {
-      console.error('Error fetching application:', err)
-      setError(err.message || 'Failed to load application')
+      console.error("Error fetching application:", err);
+      setError(err.message || "Failed to load application");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleStatusChange = async (newStatus) => {
     try {
-      setUpdatingStatus(true)
-      await updateApplicationStatus(id, newStatus)
-      setApplication(prev => ({ ...prev, status: newStatus }))
-      setEditingStatus(false)
+      setUpdatingStatus(true);
+      await updateApplicationStatus(id, newStatus);
+      setApplication((prev) => ({ ...prev, status: newStatus }));
+      setEditingStatus(false);
     } catch (err) {
-      console.error('Error updating status:', err)
-      alert('Failed to update status: ' + err.message)
+      console.error("Error updating status:", err);
+      alert("Failed to update status: " + err.message);
     } finally {
-      setUpdatingStatus(false)
+      setUpdatingStatus(false);
     }
-  }
+  };
 
   const handleOpenCommentModal = () => {
     setCommentModal({
       show: true,
-      currentComment: application.notes || ''
-    })
-  }
+      currentComment: application.notes || "",
+    });
+  };
 
   const handleSaveComment = async () => {
     try {
-      setSavingComment(true)
-      await updateApplicationStatus(id, undefined, commentModal.currentComment)
-      setApplication(prev => ({ ...prev, notes: commentModal.currentComment }))
-      setCommentModal({ show: false, currentComment: '' })
+      setSavingComment(true);
+      await updateApplicationStatus(id, undefined, commentModal.currentComment);
+      setApplication((prev) => ({
+        ...prev,
+        notes: commentModal.currentComment,
+      }));
+      setCommentModal({ show: false, currentComment: "" });
     } catch (err) {
-      console.error('Error saving comment:', err)
-      alert('Failed to save comment: ' + err.message)
+      console.error("Error saving comment:", err);
+      alert("Failed to save comment: " + err.message);
     } finally {
-      setSavingComment(false)
+      setSavingComment(false);
     }
-  }
+  };
 
   const handleCloseCommentModal = () => {
-    setCommentModal({ show: false, currentComment: '' })
-  }
+    setCommentModal({ show: false, currentComment: "" });
+  };
 
   const handleDownloadResume = () => {
     try {
-      downloadResume(application.resumeUrl)
+      downloadResume(application.resumeUrl);
     } catch (err) {
-      alert('Failed to download resume: ' + err.message)
+      alert("Failed to download resume: " + err.message);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
-    )
+    );
   }
 
   if (error || !application) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Not Found</h2>
-          <p className="text-gray-600 mb-4">{error || 'The application you are looking for does not exist.'}</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Application Not Found
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {error || "The application you are looking for does not exist."}
+          </p>
           <button
-            onClick={() => navigate('/admin/review-applications')}
+            onClick={() => navigate("/admin/review-applications")}
             className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -154,7 +171,7 @@ export default function ApplicationDetailAdmin() {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -163,7 +180,7 @@ export default function ApplicationDetailAdmin() {
         {/* Header */}
         <div className="mb-6">
           <button
-            onClick={() => navigate('/admin/review-applications')}
+            onClick={() => navigate("/admin/review-applications")}
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -171,8 +188,12 @@ export default function ApplicationDetailAdmin() {
           </button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Application Review</h1>
-              <p className="text-gray-600 mt-1">Review application details and manage status</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Application Review
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Review application details and manage status
+              </p>
             </div>
             <button
               onClick={handleDownloadResume}
@@ -194,13 +215,13 @@ export default function ApplicationDetailAdmin() {
             <div>
               <p className="text-xs text-gray-500">Name</p>
               <p className="text-sm font-medium text-gray-900 mt-1">
-                {application.applicant?.name || 'Unknown'}
+                {application.applicant?.name || "Unknown"}
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Email</p>
               <p className="text-sm font-medium text-gray-900 mt-1">
-                {application.applicant?.email || 'N/A'}
+                {application.applicant?.email || "N/A"}
               </p>
             </div>
           </div>
@@ -212,7 +233,7 @@ export default function ApplicationDetailAdmin() {
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {application.job?.title || 'Unknown Position'}
+                  {application.job?.title || "Unknown Position"}
                 </h2>
                 <button
                   onClick={() => navigate(`/jobs/${application.job?._id}`)}
@@ -235,16 +256,19 @@ export default function ApplicationDetailAdmin() {
                   className={`text-sm font-medium px-3 py-1.5 rounded focus:ring-2 focus:ring-indigo-500 ${STATUS_COLORS[application.status]}`}
                   autoFocus
                 >
-                  {STATUS_OPTIONS.map(status => (
+                  {STATUS_OPTIONS.map((status) => (
                     <option key={status} value={status}>
-                      {status.replace('-', ' ')}
+                      {status.replace("-", " ")}
                     </option>
                   ))}
                 </select>
               ) : (
                 <>
-                  <span className={`inline-flex items-center px-3 py-1 rounded text-sm font-medium ${STATUS_COLORS[application.status]}`}>
-                    {application.status?.replace('-', ' ').toUpperCase() || 'UNKNOWN'}
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded text-sm font-medium ${STATUS_COLORS[application.status]}`}
+                  >
+                    {application.status?.replace("-", " ").toUpperCase() ||
+                      "UNKNOWN"}
                   </span>
                   <button
                     onClick={() => setEditingStatus(true)}
@@ -257,7 +281,7 @@ export default function ApplicationDetailAdmin() {
               )}
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200">
             <div>
               <p className="text-xs text-gray-500">Applied On</p>
@@ -280,7 +304,7 @@ export default function ApplicationDetailAdmin() {
             <div>
               <p className="text-xs text-gray-500">Salary Expectation</p>
               <p className="text-sm font-medium text-gray-900 mt-1">
-                {application.salaryExpectation || 'Not specified'}
+                {application.salaryExpectation || "Not specified"}
               </p>
             </div>
           </div>
@@ -298,12 +322,12 @@ export default function ApplicationDetailAdmin() {
               className="inline-flex items-center px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
             >
               <Edit2 className="h-4 w-4 mr-1.5" />
-              {application.notes ? 'Edit' : 'Add'} Comment
+              {application.notes ? "Edit" : "Add"} Comment
             </button>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
             <p className="text-sm text-gray-700 whitespace-pre-wrap">
-              {application.notes || 'No comments yet'}
+              {application.notes || "No comments yet"}
             </p>
           </div>
         </div>
@@ -318,47 +342,54 @@ export default function ApplicationDetailAdmin() {
             <div className="relative">
               {/* Vertical line */}
               <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-              
+
               {/* Timeline items */}
               <div className="space-y-6">
-                {[...application.statusHistory].reverse().map((entry, index) => {
-                  const statusColors = {
-                    submitted: 'bg-blue-500',
-                    'under-review': 'bg-yellow-500',
-                    shortlisted: 'bg-purple-500',
-                    accepted: 'bg-green-500',
-                    rejected: 'bg-red-500',
-                    withdrawn: 'bg-gray-500'
-                  }
-                  const dotColor = statusColors[entry.status] || 'bg-gray-500'
-                  
-                  return (
-                    <div key={index} className="relative pl-10">
-                      {/* Dot */}
-                      <div className={`absolute left-2.5 top-1 w-3 h-3 ${dotColor} rounded-full border-2 border-white ring-2 ring-gray-100`}></div>
-                      
-                      {/* Content */}
-                      <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white border border-gray-200 capitalize">
-                              {entry.status.replace('-', ' ')}
-                            </span>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {formatDate(entry.timestamp)} • {entry.changedByRole}
-                              {entry.changedByName && ` (${entry.changedByName})`}
-                            </p>
+                {[...application.statusHistory]
+                  .reverse()
+                  .map((entry, index) => {
+                    const statusColors = {
+                      submitted: "bg-blue-500",
+                      "under-review": "bg-yellow-500",
+                      shortlisted: "bg-purple-500",
+                      accepted: "bg-green-500",
+                      rejected: "bg-red-500",
+                      withdrawn: "bg-gray-500",
+                    };
+                    const dotColor =
+                      statusColors[entry.status] || "bg-gray-500";
+
+                    return (
+                      <div key={index} className="relative pl-10">
+                        {/* Dot */}
+                        <div
+                          className={`absolute left-2.5 top-1 w-3 h-3 ${dotColor} rounded-full border-2 border-white ring-2 ring-gray-100`}
+                        ></div>
+
+                        {/* Content */}
+                        <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white border border-gray-200 capitalize">
+                                {entry.status.replace("-", " ")}
+                              </span>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {formatDate(entry.timestamp)} •{" "}
+                                {entry.changedByRole}
+                                {entry.changedByName &&
+                                  ` (${entry.changedByName})`}
+                              </p>
+                            </div>
                           </div>
+                          {entry.comment && (
+                            <p className="text-sm text-gray-700 mt-2 italic">
+                              "{entry.comment}"
+                            </p>
+                          )}
                         </div>
-                        {entry.comment && (
-                          <p className="text-sm text-gray-700 mt-2 italic">
-                            "{entry.comment}"
-                          </p>
-                        )}
                       </div>
-                    </div>
-                  )
-                })}
+                    );
+                  })}
               </div>
             </div>
           </div>
@@ -375,7 +406,7 @@ export default function ApplicationDetailAdmin() {
               </h3>
               <div className="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {application.coverLetter || 'No cover letter provided'}
+                  {application.coverLetter || "No cover letter provided"}
                 </p>
               </div>
             </div>
@@ -388,7 +419,7 @@ export default function ApplicationDetailAdmin() {
               </h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {application.whyInterested || 'Not provided'}
+                  {application.whyInterested || "Not provided"}
                 </p>
               </div>
             </div>
@@ -401,7 +432,7 @@ export default function ApplicationDetailAdmin() {
               </h3>
               <div className="bg-gray-50 rounded-lg p-4 max-h-80 overflow-y-auto">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {application.relevantExperience || 'No experience provided'}
+                  {application.relevantExperience || "No experience provided"}
                 </p>
               </div>
             </div>
@@ -420,21 +451,27 @@ export default function ApplicationDetailAdmin() {
                   <Mail className="h-5 w-5 mr-3 text-gray-400 mt-0.5" />
                   <div>
                     <p className="text-xs text-gray-500">Email</p>
-                    <p className="text-sm text-gray-900">{application.applicant?.email || 'N/A'}</p>
+                    <p className="text-sm text-gray-900">
+                      {application.applicant?.email || "N/A"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Phone className="h-5 w-5 mr-3 text-gray-400 mt-0.5" />
                   <div>
                     <p className="text-xs text-gray-500">Phone</p>
-                    <p className="text-sm text-gray-900">{application.profile?.phone || 'N/A'}</p>
+                    <p className="text-sm text-gray-900">
+                      {application.profile?.phone || "N/A"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <MapPin className="h-5 w-5 mr-3 text-gray-400 mt-0.5" />
                   <div>
                     <p className="text-xs text-gray-500">Location</p>
-                    <p className="text-sm text-gray-900">{application.profile?.location || 'N/A'}</p>
+                    <p className="text-sm text-gray-900">
+                      {application.profile?.location || "N/A"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -443,7 +480,9 @@ export default function ApplicationDetailAdmin() {
             {/* Professional Summary */}
             {application.profile?.summary && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Professional Summary</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Professional Summary
+                </h3>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 rounded-lg p-4">
                   {application.profile.summary}
                 </p>
@@ -451,48 +490,56 @@ export default function ApplicationDetailAdmin() {
             )}
 
             {/* Education */}
-            {application.profile?.education && application.profile.education.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <GraduationCap className="h-5 w-5 mr-2 text-indigo-600" />
-                  Education
-                </h3>
-                <div className="space-y-3">
-                  {application.profile.education.map((edu, index) => (
-                    <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <p className="font-medium text-sm text-gray-900">
-                        {edu.degree} {edu.fieldOfStudy && `in ${edu.fieldOfStudy}`}
-                      </p>
-                      <p className="text-xs text-gray-600 mt-1">{edu.institution}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {edu.startDate} - {edu.endDate || 'Present'}
-                        {edu.grade && ` • Grade: ${edu.grade}`}
-                      </p>
-                    </div>
-                  ))}
+            {application.profile?.education &&
+              application.profile.education.length > 0 && (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <GraduationCap className="h-5 w-5 mr-2 text-indigo-600" />
+                    Education
+                  </h3>
+                  <div className="space-y-3">
+                    {application.profile.education.map((edu, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                      >
+                        <p className="font-medium text-sm text-gray-900">
+                          {edu.degree}{" "}
+                          {edu.fieldOfStudy && `in ${edu.fieldOfStudy}`}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {edu.institution}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {edu.startDate} - {edu.endDate || "Present"}
+                          {edu.grade && ` • Grade: ${edu.grade}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Skills */}
-            {application.profile?.skills && application.profile.skills.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Award className="h-5 w-5 mr-2 text-indigo-600" />
-                  Skills
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {application.profile.skills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+            {application.profile?.skills &&
+              application.profile.skills.length > 0 && (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <Award className="h-5 w-5 mr-2 text-indigo-600" />
+                    Skills
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {application.profile.skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Resume */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -506,9 +553,11 @@ export default function ApplicationDetailAdmin() {
                     <FileText className="h-8 w-8 text-indigo-600 mr-3" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        {application.resumeFileName || 'Resume.pdf'}
+                        {application.resumeFileName || "Resume.pdf"}
                       </p>
-                      <p className="text-xs text-gray-500">Uploaded on {formatDate(getSubmissionDate(application))}</p>
+                      <p className="text-xs text-gray-500">
+                        Uploaded on {formatDate(getSubmissionDate(application))}
+                      </p>
                     </div>
                   </div>
                   <button
@@ -525,11 +574,16 @@ export default function ApplicationDetailAdmin() {
 
         {/* Comment Modal */}
         {commentModal.show && (
-          <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+          <div
+            className="fixed inset-0 z-50 overflow-y-auto"
+            aria-labelledby="modal-title"
+            role="dialog"
+            aria-modal="true"
+          >
             <div className="flex items-center justify-center min-h-screen px-4 py-6">
               {/* Background overlay */}
-              <div 
-                className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+              <div
+                className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
                 aria-hidden="true"
                 onClick={handleCloseCommentModal}
               ></div>
@@ -537,10 +591,17 @@ export default function ApplicationDetailAdmin() {
               {/* Modal panel */}
               <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full z-10">
                 <div className="px-6 py-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Edit Admin Comment</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Edit Admin Comment
+                  </h3>
                   <textarea
                     value={commentModal.currentComment}
-                    onChange={(e) => setCommentModal(prev => ({ ...prev, currentComment: e.target.value }))}
+                    onChange={(e) =>
+                      setCommentModal((prev) => ({
+                        ...prev,
+                        currentComment: e.target.value,
+                      }))
+                    }
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Enter your comment about this applicant..."
@@ -554,7 +615,7 @@ export default function ApplicationDetailAdmin() {
                     disabled={savingComment}
                     className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {savingComment ? 'Saving...' : 'Save'}
+                    {savingComment ? "Saving..." : "Save"}
                   </button>
                   <button
                     type="button"
@@ -571,5 +632,5 @@ export default function ApplicationDetailAdmin() {
         )}
       </div>
     </div>
-  )
+  );
 }
